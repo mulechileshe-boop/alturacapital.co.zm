@@ -441,11 +441,9 @@ tbody td:first-child, tbody td:nth-child(2) { text-align: left; }
 
 <div class="section-divider"></div>
 
-<!-- API BAR -->
+<!-- CONTROLS BAR -->
 <div class="api-bar">
-  <label>Anthropic API Key</label>
-  <input type="password" class="api-input" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
-  <button class="btn btn-primary" id="fetchBtn" onclick="fetchAllPrices()" disabled>
+  <button class="btn btn-primary" id="fetchBtn" onclick="fetchAllPrices()">
     ⟳&nbsp;&nbsp;Fetch Live Data
   </button>
   <div style="width:1px;height:22px;background:var(--border);margin:0 4px;"></div>
@@ -552,7 +550,7 @@ tbody td:first-child, tbody td:nth-child(2) { text-align: left; }
     <span class="fc">CAPITAL</span>
   </div>
   <div class="footer-note">
-    Prices sourced via AI web search (Anthropic Claude + web_search). Verify with official exchange disclosures before investing. Not financial advice.
+    Prices sourced via API web search. Verify with official exchange disclosures before investing. Not financial advice.
   </div>
 </div>
 
@@ -663,16 +661,11 @@ let editIdx = null, autoTimer = null, fetchInProgress = false;
 let _sk = 'score', _sd = -1;
 
 // ═══════════════════════════════════════════════════════════════
-// API KEY
+// CONFIG — replace with your key before deploying
 // ═══════════════════════════════════════════════════════════════
-const apiInput = document.getElementById('apiKey');
+const API_KEY = 'YOUR_API_KEY_HERE';
+
 const fetchBtn = document.getElementById('fetchBtn');
-apiInput.addEventListener('input', () => {
-  const ok = apiInput.value.trim().startsWith('sk-ant');
-  fetchBtn.disabled = !ok;
-  setStatus(ok ? 'idle' : 'nokey', ok ? 'ready' : 'awaiting key');
-});
-function getKey() { return apiInput.value.trim(); }
 
 function setStatus(state, msg) {
   const dot = document.getElementById('statusDot');
@@ -686,7 +679,7 @@ function setStatus(state, msg) {
 function toggleAuto() {
   const on = document.getElementById('autoToggle').checked;
   if (on) {
-    if (!getKey().startsWith('sk-ant')) { document.getElementById('autoToggle').checked = false; alert('Enter your Anthropic API key first.'); return; }
+    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') { document.getElementById('autoToggle').checked = false; alert('API key not configured.'); return; }
     scheduleAuto();
   } else { clearTimeout(autoTimer); autoTimer = null; }
 }
@@ -717,8 +710,8 @@ function setProgress(pct) { document.getElementById('progressFill').style.width 
 // ═══════════════════════════════════════════════════════════════
 async function fetchAllPrices() {
   if (fetchInProgress) return;
-  const key = getKey();
-  if (!key.startsWith('sk-ant')) { alert('Please enter a valid Anthropic API key.'); return; }
+  const key = API_KEY;
+  if (!key || key === 'YOUR_API_KEY_HERE') { alert('API key not configured.'); return; }
 
   fetchInProgress = true; fetchBtn.disabled = true;
   setStatus('loading', 'fetching…');
@@ -1050,7 +1043,7 @@ function resetFilters() {
 }
 ['editModal','addModal'].forEach(id=>document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(id);}));
 
-setStatus('nokey','awaiting key');
+setStatus('idle', 'ready');
 render();
 </script>
 </body>
