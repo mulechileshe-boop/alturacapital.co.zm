@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Avenir Next', 'Avenir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            font-weight: 400; /* Regular */
+            font-weight: 400;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -22,14 +22,14 @@
             padding: 20px;
         }
         img {
-            max-width: 300px; /* Adjust this to fit your logo size */
+            max-width: 300px;
             height: auto;
             margin-bottom: 20px;
         }
         h1 {
-            font-size: 2.5em; /* Reduced from 3.5em */
+            font-size: 2.5em;
             color: #3e613c;
-            font-weight: 400; /* Regular */
+            font-weight: 400;
             margin-bottom: 20px;
         }
         p {
@@ -43,47 +43,75 @@
             display: block;
             margin-bottom: 10px;
             color: #3e613c;
-            font-size: 1.2em; /* Slightly larger */
+            font-size: 1.2em;
         }
         input[type="email"] {
-            padding: 12px; /* Slightly larger padding */
+            padding: 12px;
             width: 300px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-family: inherit;
-            font-weight: 400; /* Regular */
-            font-size: 1.1em; /* Larger font */
+            font-weight: 400;
+            font-size: 1.1em;
         }
         button[type="submit"] {
-            padding: 12px 24px; /* Slightly larger */
+            padding: 12px 24px;
             background-color: #3e613c;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
-            font-weight: 400; /* Regular */
-            font-size: 1.1em; /* Larger font */
+            font-weight: 400;
+            font-size: 1.1em;
         }
         button[type="submit"]:hover {
             background-color: #2e4e2b;
         }
-        .download-button {
-            display: inline-block;
+
+        /* ── Screener button ── */
+        .screener-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
             margin-top: 20px;
-            padding: 12px 24px; /* Slightly larger */
-            background-color: #3e613c;
-            color: white;
+            padding: 13px 28px;
+            background-color: #000;
+            color: #fff;
             text-decoration: none;
             border-radius: 4px;
             font-family: inherit;
-            font-weight: 400; /* Regular */
-            font-size: 1.1em; /* Larger font */
+            font-weight: 600;
+            font-size: 1.05em;
+            letter-spacing: 0.5px;
+            border: 1px solid #000;
+            transition: background-color 0.2s, color 0.2s;
         }
-        .download-button:hover {
-            background-color: #2e4e2b;
+        .screener-button:hover {
+            background-color: #3e613c;
+            border-color: #3e613c;
         }
+        .screener-button .beta-pill {
+            background-color: #3e613c;
+            color: #fff;
+            font-size: 0.65em;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        .screener-button:hover .beta-pill {
+            background-color: #000;
+        }
+        .screener-note {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+
         @media (max-width: 600px) {
             input[type="email"] {
                 width: 90%;
@@ -100,8 +128,9 @@
             <input type="email" id="email" name="email" placeholder="Enter your email" required>
             <button type="submit">Subscribe</button>
         </form>
-        <a href="valuation.pdf" class="download-button" download>Download Valuation Opinion</a>
-        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">In the meantime, have a look at the IPO Opinion by our analysts. Stay tuned for more updates!</p>
+        <a href="altura_luse_screener.html" class="screener-button">
+            Stock Screener <span class="beta-pill">Beta</span>
+        </a>
     </div>
 </body>
 </html>
