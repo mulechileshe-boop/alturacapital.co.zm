@@ -59,11 +59,11 @@ select.ctrl{appearance:none;-webkit-appearance:none;height:32px;padding:0 30px 0
 select.ctrl:hover{border-color:var(--line3);color:var(--text)}
 select.ctrl option{background:var(--s2);color:var(--text)}
 
-.auto{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);cursor:pointer}
-.toggle{appearance:none;width:30px;height:17px;border-radius:10px;background:var(--s4);border:1px solid var(--line3);position:relative;cursor:pointer;transition:background .25s var(--ease),border-color .25s}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:var(--text3);transition:transform .3s var(--ease),background .25s}
-.toggle:checked{background:var(--brand);border-color:var(--brand)}
-.toggle:checked::after{transform:translateX(13px);background:#fff}
+
+
+
+
+
 
 .prog{height:2px;overflow:hidden}
 .prog-fill{height:100%;width:0;opacity:0;background:var(--up);transition:width .35s var(--ease),opacity .4s}
@@ -249,6 +249,21 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 @media (max-width:1000px){.grid3,.grid2,.pgrid{grid-template-columns:1fr}.mgrid{grid-template-columns:1fr 1fr}.kpi{border-bottom:1px solid var(--line)}}
 @media (max-width:640px){.hdr,.tabs{padding-left:16px;padding-right:16px}.wrap{padding:16px}.tab{margin-right:18px}.search input,.search input:focus{width:100%}.search{flex:1 1 100%}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* liquidity + data quality */
+.tier{display:inline-flex;align-items:center;gap:7px;font-size:12.5px}
+.bars{display:inline-flex;align-items:flex-end;gap:2px;height:11px}
+.bars b{width:3px;border-radius:1px;background:var(--line3)}
+.bars b:nth-child(1){height:5px}.bars b:nth-child(2){height:8px}.bars b:nth-child(3){height:11px}
+.t1{color:var(--amber)}.t2{color:#8fca91}.t3{color:var(--up)}.t0{color:var(--text4)}
+.t1 .bars b:nth-child(1),.t2 .bars b:nth-child(-n+2),.t3 .bars b{background:currentColor}
+.dq{font-size:12px}.dq-res{color:var(--up)}.dq-est{color:var(--amber)}.dq-none{color:var(--text4)}
+.sig-nr{color:var(--text3);background:var(--s3)}
+.notice{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;margin-bottom:14px;border:1px solid var(--line2);border-left:3px solid var(--amber);border-radius:var(--r);background:var(--s1);font-size:12.5px;color:var(--text2);max-width:880px}
+.capacity{margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--text2);line-height:1.55}
+.capacity b{color:var(--text);font-weight:600}
+.check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);grid-column:span 2;cursor:pointer}
+.check input{accent-color:var(--brand2);width:15px;height:15px}
 </style>
 </head>
 <body>
@@ -259,19 +274,13 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
     <div class="hdr-sub">Zambian listed equities, priced in kwacha</div>
   </div>
   <div class="hdr-r">
-    <div class="status"><span class="dot" id="sDot"></span><span id="sTxt">Ready</span><span class="ts" id="tsLbl"></span></div>
-    <div class="sep"></div>
-    <label class="auto">Auto-refresh <input type="checkbox" class="toggle" id="autoTog" onchange="toggleAuto()"></label>
-    <select class="ctrl" id="intSel" onchange="setIntvl()" aria-label="Refresh interval">
-      <option value="60">Every 1 min</option><option value="300" selected>Every 5 min</option>
-      <option value="600">Every 10 min</option><option value="1800">Every 30 min</option>
-    </select>
+    <div class="status"><span class="dot" id="sDot"></span><span id="sTxt">Loading prices</span></div>
     <div class="sep"></div>
     <button class="btn" onclick="openAdd()">Add stock</button>
     <button class="btn" onclick="doCSV()">Export CSV</button>
-    <button class="btn btn-primary" id="fetchBtn" onclick="fetchAll()">
+    <button class="btn btn-primary" id="fetchBtn" onclick="loadData(true)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-      <span>Refresh prices</span>
+      <span>Load latest close</span>
     </button>
   </div>
 </header>
@@ -294,14 +303,14 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
     <div class="kpi" style="animation-delay:150ms"><div class="kpi-l"><i style="background:var(--orange)"></i>Sell</div><div class="kpi-v" style="color:var(--orange)" id="k-s">0</div><div class="kpi-s">Score 1.2 to 2.1</div></div>
     <div class="kpi" style="animation-delay:200ms"><div class="kpi-l"><i style="background:var(--down)"></i>Strong sell</div><div class="kpi-v neg" id="k-ss">0</div><div class="kpi-s">Score below 1.2</div></div>
     <div class="kpi" style="animation-delay:250ms"><div class="kpi-l">Undervalued</div><div class="kpi-v" id="k-uv">0</div><div class="kpi-s" id="k-uv-s">Below Graham value</div></div>
-    <div class="kpi" style="animation-delay:300ms"><div class="kpi-l">Average dividend yield</div><div class="kpi-v" id="k-dy">0.00%</div><div class="kpi-s">Across all stocks</div></div>
-    <div class="kpi" style="animation-delay:350ms"><div class="kpi-l">Median P/E</div><div class="kpi-v" id="k-pe">0.0×</div><div class="kpi-s">Market-wide</div></div>
+    <div class="kpi" style="animation-delay:300ms"><div class="kpi-l">Average dividend yield</div><div class="kpi-v" id="k-dy">0.00%</div><div class="kpi-s">Stocks with dividend data</div></div>
+    <div class="kpi" style="animation-delay:350ms"><div class="kpi-l">Value traded</div><div class="kpi-v" id="k-vt">K 0</div><div class="kpi-s" id="k-vt-s">Latest session</div></div>
   </div>
   <div class="grid3">
-    <div class="card" style="animation-delay:380ms"><div class="card-h"><div class="card-t">Top gainers</div><div class="card-s">Change on previous close</div></div><div id="gainers"></div></div>
-    <div class="card" style="animation-delay:440ms"><div class="card-h"><div class="card-t">Weakest performers</div><div class="card-s">Change on previous close</div></div><div id="losers"></div></div>
+    <div class="card" style="animation-delay:380ms"><div class="card-h"><div class="card-t">Most traded</div><div class="card-s">Value traded in the latest session</div></div><div id="mostTraded"></div></div>
+    <div class="card" style="animation-delay:440ms"><div class="card-h"><div class="card-t">Price movers</div><div class="card-s">Stocks whose price changed on the last close</div></div><div id="movers"></div></div>
     <div class="card" style="animation-delay:500ms">
-      <div class="card-h"><div class="card-t">Signal distribution</div><div class="card-s">How the market scores today</div></div>
+      <div class="card-h"><div class="card-t">Signal distribution</div><div class="card-s">Stocks without results data are not rated</div></div>
       <div id="sigDist"></div>
       <div class="divider"></div>
       <div class="card-h"><div class="card-t">Dividend leaders</div><div class="card-s">Highest trailing yield</div></div>
@@ -312,30 +321,33 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 
 <!-- SCREENER -->
 <section class="panel" id="tab-screener"><div class="wrap">
+  <div class="notice" id="estNotice">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+    <span id="estText"></span>
+  </div>
   <div class="filters">
     <div class="search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="srchBox" placeholder="Search ticker or company" oninput="renderTable(false)" aria-label="Search">
     </div>
     <select class="ctrl" id="fSig" onchange="renderTable(false)" aria-label="Signal">
-      <option value="all">All signals</option><option>Strong Buy</option><option>Buy</option><option>Hold</option><option>Sell</option><option>Strong Sell</option>
+      <option value="all">All signals</option><option>Strong Buy</option><option>Buy</option><option>Hold</option><option>Sell</option><option>Strong Sell</option><option>Not rated</option>
     </select>
     <select class="ctrl" id="fSec" onchange="renderTable(false)" aria-label="Sector">
       <option value="all">All sectors</option><option>Consumer</option><option>Financial</option><option>Industrials</option><option>Materials</option><option>Utilities</option><option>Telecoms</option><option>Energy</option><option>Insurance</option><option>Real Estate</option><option>Technology</option>
     </select>
+    <select class="ctrl" id="fLiq" onchange="renderTable(false)" aria-label="Liquidity">
+      <option value="0">Any liquidity</option><option value="1">Traded recently</option><option value="2">Moderate or better</option><option value="3">High only</option>
+    </select>
     <select class="ctrl" id="fVal" onchange="renderTable(false)" aria-label="Valuation">
       <option value="all">Any valuation</option><option>Undervalued</option><option>Fair Value</option><option>Overvalued</option>
     </select>
-    <select class="ctrl" id="fScore" onchange="renderTable(false)" aria-label="Minimum score">
-      <option value="0">Any score</option><option value="2">Score 2+</option><option value="3">Score 3+</option><option value="4">Score 4+</option>
-    </select>
-    <select class="ctrl" id="fData" onchange="renderTable(false)" aria-label="Data source">
-      <option value="all">All sources</option><option value="live">Live prices</option><option value="manual">Manual data</option>
+    <select class="ctrl" id="fData" onchange="renderTable(false)" aria-label="Fundamentals">
+      <option value="all">All fundamentals</option><option value="res">From results</option><option value="est">Estimates</option><option value="none">Awaiting results</option>
     </select>
     <button class="btn" onclick="resetFilters()">Clear filters</button>
     <span class="count"><span id="rowCount"></span><span class="kbd">/</span></span>
   </div>
-  <div class="log" id="logBar"></div>
   <div class="tcard" id="tcard"><div class="tscroll">
     <table id="scrTable">
       <thead><tr>
@@ -343,18 +355,19 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
         <th class="l" data-k="sector">Sector<span class="ar">↑</span></th>
         <th data-k="price">Price<span class="ar">↑</span></th>
         <th data-k="change">Change<span class="ar">↑</span></th>
+        <th data-k="liqValue">Value traded<span class="ar">↑</span></th>
+        <th class="l" data-k="liqSort">Liquidity<span class="ar">↑</span></th>
         <th data-k="pe">P/E<span class="ar">↑</span></th>
         <th data-k="pb">P/B<span class="ar">↑</span></th>
         <th data-k="roe">ROE<span class="ar">↑</span></th>
         <th data-k="ey">Earnings yield<span class="ar">↑</span></th>
         <th data-k="divYield">Dividend yield<span class="ar">↑</span></th>
-        <th data-k="rsi">RSI<span class="ar">↑</span></th>
         <th data-k="pos52w">52-week position<span class="ar">↑</span></th>
         <th data-k="mos">Margin of safety<span class="ar">↑</span></th>
         <th data-k="score">Score<span class="ar">↑</span></th>
         <th data-k="valuation">Valuation<span class="ar">↑</span></th>
         <th class="l" data-k="signal">Signal<span class="ar">↑</span></th>
-        <th class="l">Source</th>
+        <th class="l" data-k="dqRank">Fundamentals<span class="ar">↑</span></th>
         <th></th>
       </tr></thead>
       <tbody id="tBody"></tbody>
@@ -365,8 +378,8 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 <!-- ANALYTICS -->
 <section class="panel" id="tab-analytics"><div class="wrap">
   <div class="grid2">
-    <div class="card"><div class="card-h"><div class="card-t">Composite score</div><div class="card-s">Every stock ranked out of 5</div></div><div class="chart-box"><canvas id="chScore"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-t">Sector mix</div><div class="card-s">Number of listings per sector</div></div><div class="chart-box"><canvas id="chSector"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-t">Composite score</div><div class="card-s">Rated stocks, ranked out of 5</div></div><div class="chart-box"><canvas id="chScore"></canvas></div></div>
+    <div class="card"><div class="card-h"><div class="card-t">Score against liquidity</div><div class="card-s">Value traded (log scale) against score, rated stocks only</div></div><div class="chart-box"><canvas id="chLiq"></canvas></div><div class="note">A high score only helps if you can trade the stock. Look to the top right.</div></div>
     <div class="card"><div class="card-h"><div class="card-t">Value map</div><div class="card-s">P/E against dividend yield, bubble size shows score</div></div><div class="chart-box"><canvas id="chBub"></canvas></div><div class="note">Stocks towards the top left combine a low earnings multiple with a high yield.</div></div>
     <div class="card">
       <div class="card-h" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
@@ -375,8 +388,8 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
       </div>
       <div id="wtSliders"></div>
       <div class="divider"></div>
-      <div class="card-h"><div class="card-t">RSI heatmap</div><div class="card-s">Green is oversold (below 30), red is overbought (above 70)</div></div>
-      <div class="heat" id="rsiHeat"></div>
+      <div class="card-h"><div class="card-t">Liquidity map</div><div class="card-s">High is K100,000 or more a day, moderate K10,000 or more, thin anything below</div></div>
+      <div class="heat" id="liqHeat"></div>
     </div>
   </div>
 </div></section>
@@ -397,11 +410,11 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
       <div class="field"><label for="pCost">Cost per share (K)</label><input type="number" id="pCost" min="0" step="0.01" placeholder="12.50"></div>
       <button class="btn btn-primary" onclick="addPosition()" style="width:100%;justify-content:center;height:36px">Add holding</button>
     </div>
-    <div class="card"><div class="card-h"><div class="card-t">Holdings</div><div class="card-s">Valued at the latest prices in the screener</div></div><div id="holdings"></div></div>
+    <div class="card"><div class="card-h"><div class="card-t">Holdings</div><div class="card-s">Valued at the latest closing prices</div></div><div id="holdings"></div></div>
   </div>
 </div></section>
 
-<footer class="ftr">Prices sourced via API web search. Verify with official exchange disclosures before investing. Not financial advice.</footer>
+<footer class="ftr" id="ftr">Closing prices update after each trading session. Fundamentals marked as estimates are placeholders until replaced with published results. Not financial advice.</footer>
 
 <!-- DETAIL MODAL -->
 <div class="mo" id="detailModal" role="dialog" aria-modal="true"><div class="md">
@@ -411,7 +424,8 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
   </div>
   <div class="md-b">
     <div class="mgrid" id="dm-metrics"></div>
-    <div class="range">
+    <div class="capacity" id="dm-cap"></div>
+    <div class="range" id="dm-range">
       <div class="range-l"><span>52-week range</span><span id="dm-pos"></span></div>
       <div class="range-t"><div class="range-m" id="dm-marker"></div></div>
       <div class="range-e"><span id="dm-lo"></span><span id="dm-hi"></span></div>
@@ -427,12 +441,13 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
   <div class="md-b fgrid">
     <div class="field"><label for="ePrice">Price (K)</label><input type="number" id="ePrice" step="0.01" min="0"></div>
     <div class="field"><label for="ePrev">Previous close (K)</label><input type="number" id="ePrev" step="0.01" min="0"></div>
-    <div class="field"><label for="eEps">Earnings per share (K)</label><input type="number" id="eEps" step="0.01"></div>
-    <div class="field"><label for="eBvps">Book value per share (K)</label><input type="number" id="eBvps" step="0.01" min="0"></div>
-    <div class="field"><label for="eDiv">Annual dividend (K)</label><input type="number" id="eDiv" step="0.001" min="0"></div>
-    <div class="field"><label for="eRsi">RSI</label><input type="number" id="eRsi" step="1" min="0" max="100"></div>
+    <div class="field"><label for="eEps">Earnings per share (K)</label><input type="number" id="eEps" step="0.01" placeholder="From latest results"></div>
+    <div class="field"><label for="eBvps">Book value per share (K)</label><input type="number" id="eBvps" step="0.01" min="0" placeholder="Equity ÷ shares in issue"></div>
+    <div class="field"><label for="eDiv">Dividends, last 12 months (K)</label><input type="number" id="eDiv" step="0.001" min="0"></div>
+    <div class="field"><label for="eVal">Value traded, latest session (K)</label><input type="number" id="eVal" step="1" min="0"></div>
     <div class="field"><label for="e52h">52-week high (K)</label><input type="number" id="e52h" step="0.01" min="0"></div>
     <div class="field"><label for="e52l">52-week low (K)</label><input type="number" id="e52l" step="0.01" min="0"></div>
+    <label class="check"><input type="checkbox" id="eRes"> Earnings, book value and dividends are taken from published results</label>
   </div>
   <div class="md-f"><button class="btn" onclick="closeModal('editModal')">Cancel</button><button class="btn btn-primary" onclick="saveEdit()">Save changes</button></div>
 </div></div>
@@ -445,12 +460,11 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
     <div class="field"><label for="aSec">Sector</label><select class="ctrl" id="aSec"><option>Consumer</option><option>Financial</option><option>Industrials</option><option>Materials</option><option>Utilities</option><option>Telecoms</option><option>Energy</option><option>Insurance</option><option>Real Estate</option><option>Technology</option></select></div>
     <div class="field full"><label for="aName">Company name</label><input type="text" id="aName"></div>
     <div class="field"><label for="aPrice">Price (K)</label><input type="number" id="aPrice" step="0.01" min="0"></div>
-    <div class="field"><label for="aEps">Earnings per share (K)</label><input type="number" id="aEps" step="0.01"></div>
-    <div class="field"><label for="aBvps">Book value per share (K)</label><input type="number" id="aBvps" step="0.01" min="0"></div>
-    <div class="field"><label for="aDiv">Annual dividend (K)</label><input type="number" id="aDiv" step="0.001" min="0"></div>
+    <div class="field"><label for="aEps">Earnings per share (K)</label><input type="number" id="aEps" step="0.01" placeholder="Leave blank if unknown"></div>
+    <div class="field"><label for="aBvps">Book value per share (K)</label><input type="number" id="aBvps" step="0.01" min="0" placeholder="Leave blank if unknown"></div>
+    <div class="field"><label for="aDiv">Dividends, last 12 months (K)</label><input type="number" id="aDiv" step="0.001" min="0"></div>
     <div class="field"><label for="a52h">52-week high (K)</label><input type="number" id="a52h" step="0.01" min="0"></div>
     <div class="field"><label for="a52l">52-week low (K)</label><input type="number" id="a52l" step="0.01" min="0"></div>
-    <div class="field"><label for="aRsi">RSI</label><input type="number" id="aRsi" value="50" min="0" max="100"></div>
   </div>
   <div class="md-f"><button class="btn" onclick="closeModal('addModal')">Cancel</button><button class="btn btn-primary" onclick="saveNew()">Add stock</button></div>
 </div></div>
@@ -458,50 +472,54 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 <div class="toasts" id="toasts"></div>
 
 <script>
-// ─── CONFIG ─────────────────────────────────────────────
-const API_KEY = 'YOUR_API_KEY_HERE';
-const MODEL   = 'claude-sonnet-4-6';
-const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 // ─── DATA ───────────────────────────────────────────────
+// Seed closes: 23 Sep 2026. A nightly job replaces these via data/prices.json.
+// est:true  = earnings, book value, dividends and 52-week range are placeholders, not from results.
+// eps/bvps null = no usable figures yet, so the stock is not rated.
+const SEED_DATE = '2026-09-23';
 let stocks = [
-  {ticker:'AECI',name:'AECI Mining Explosives Zambia Plc',   sector:'Materials',  price:129.67,prev:130.00,eps:12.50,bvps:88.00, div:4.50,h52:140.00,l52:48.00, rsi:55,liveSource:null},
-  {ticker:'ATEL',name:'Airtel Networks Zambia Plc',          sector:'Telecoms',   price:139.30,prev:137.74,eps:8.20, bvps:62.00, div:3.50,h52:150.00,l52:92.00, rsi:58,liveSource:null},
-  {ticker:'BATA',name:'Zambia Bata Shoe Company Ltd',        sector:'Consumer',   price:8.50,  prev:8.50,  eps:0.55, bvps:6.20,  div:0.10,h52:9.50,  l52:5.80,  rsi:50,liveSource:null},
-  {ticker:'BATZ',name:'British American Tobacco Zambia Plc', sector:'Consumer',   price:14.50, prev:14.35, eps:2.10, bvps:8.50,  div:1.80,h52:16.00, l52:12.00, rsi:53,liveSource:null},
-  {ticker:'CCAF',name:'CEC Africa Investments Ltd',          sector:'Financial',  price:0.19,  prev:0.20,  eps:0.02, bvps:0.28,  div:0.00,h52:0.28,  l52:0.14,  rsi:38,liveSource:null},
-  {ticker:'CECZ',name:'Copperbelt Energy Corporation Plc',   sector:'Utilities',  price:0.75,  prev:0.79,  eps:0.06, bvps:0.65,  div:0.02,h52:1.10,  l52:0.60,  rsi:40,liveSource:null},
-  {ticker:'CHIL',name:'Lafarge Zambia Plc',                  sector:'Industrials',price:77.76, prev:79.80, eps:5.20, bvps:52.00, div:1.50,h52:95.00, l52:60.00, rsi:46,liveSource:null},
-  {ticker:'DCZM',name:'Dot Com Zambia Plc',                  sector:'Technology', price:24.85, prev:24.62, eps:0.80, bvps:12.00, div:0.00,h52:30.00, l52:8.00,  rsi:62,liveSource:null},
-  {ticker:'MAFS',name:'Madison Financial Services Plc',      sector:'Financial',  price:1.81,  prev:1.81,  eps:0.18, bvps:1.50,  div:0.05,h52:2.20,  l52:1.40,  rsi:50,liveSource:null},
-  {ticker:'NATB',name:'National Breweries Plc',              sector:'Consumer',   price:2.93,  prev:2.97,  eps:0.30, bvps:2.10,  div:0.08,h52:3.80,  l52:2.20,  rsi:44,liveSource:null},
-  {ticker:'PUMA',name:'Puma Energy Zambia Plc',              sector:'Energy',     price:2.74,  prev:2.80,  eps:0.22, bvps:1.85,  div:0.06,h52:4.20,  l52:2.40,  rsi:42,liveSource:null},
-  {ticker:'REIZ',name:'Real Estate Investments Zambia Plc',  sector:'Real Estate',price:2.00,  prev:2.00,  eps:0.12, bvps:2.80,  div:0.08,h52:2.20,  l52:1.10,  rsi:60,liveSource:null},
-  {ticker:'SCBL',name:'Standard Chartered Bank Zambia Plc',  sector:'Financial',  price:1.20,  prev:1.49,  eps:0.18, bvps:2.10,  div:0.05,h52:2.60,  l52:1.10,  rsi:28,liveSource:null},
-  {ticker:'SHOP',name:'Shoprite Holdings Ltd',                sector:'Consumer',   price:170.00,prev:168.00,eps:18.00,bvps:115.00,div:5.50,h52:200.00,l52:140.00,rsi:60,liveSource:null},
-  {ticker:'ZABR',name:'Zambian Breweries Plc',                sector:'Consumer',   price:6.75,  prev:8.00,  eps:0.55, bvps:5.20,  div:0.18,h52:8.50,  l52:5.80,  rsi:32,liveSource:null},
-  {ticker:'ZCCM',name:'ZCCM Investment Holdings Plc',         sector:'Materials',  price:28.50, prev:28.50, eps:2.80, bvps:24.00, div:0.80,h52:35.00, l52:20.00, rsi:50,liveSource:null},
-  {ticker:'ZFCO',name:'ZAFFICO Plc',                          sector:'Materials',  price:3.59,  prev:3.57,  eps:0.20, bvps:3.80,  div:0.05,h52:5.00,  l52:2.80,  rsi:49,liveSource:null},
-  {ticker:'ZMBF',name:'Zambeef Products Plc',                 sector:'Consumer',   price:2.19,  prev:2.18,  eps:0.22, bvps:3.20,  div:0.04,h52:4.00,  l52:1.80,  rsi:46,liveSource:null},
-  {ticker:'ZMFA',name:'Metal Fabricators of Zambia Plc',      sector:'Industrials',price:59.33, prev:60.00, eps:4.50, bvps:38.00, div:1.00,h52:70.00, l52:40.00, rsi:48,liveSource:null},
-  {ticker:'ZMRE',name:'Klapton Reinsurance Plc',              sector:'Insurance',  price:2.80,  prev:2.72,  eps:0.28, bvps:2.50,  div:0.08,h52:3.20,  l52:2.00,  rsi:54,liveSource:null},
-  {ticker:'ZNCO',name:'Zambia National Commercial Bank Plc',  sector:'Financial',  price:9.44,  prev:9.53,  eps:0.80, bvps:7.20,  div:0.25,h52:11.00, l52:6.50,  rsi:48,liveSource:null},
-  {ticker:'ZSUG',name:'Zambia Sugar Plc',                     sector:'Consumer',   price:69.10, prev:68.19, eps:6.50, bvps:45.00, div:2.00,h52:75.12, l52:36.10, rsi:58,liveSource:null},
+  {ticker:'AECI',name:'AECI Mining Explosives Zambia Plc',   sector:'Materials',  price:115.00,prev:116.00,vol:7,    val:805,    eps:12.50,bvps:88.00,div:4.50, h52:140.00,l52:48.00, est:true},
+  {ticker:'ATEL',name:'Airtel Networks Zambia Plc',          sector:'Telecoms',   price:224.00,prev:224.00,vol:2600, val:575900, eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'BATA',name:'Zambia Bata Shoe Company Ltd',        sector:'Consumer',   price:9.53,  prev:9.53,  vol:886,  val:8400,   eps:0.55, bvps:6.20, div:0.10, h52:9.50,  l52:5.80,  est:true},
+  {ticker:'BATZ',name:'British American Tobacco Zambia Plc', sector:'Consumer',   price:13.00, prev:12.97, vol:1300, val:17400,  eps:2.10, bvps:8.50, div:1.80, h52:16.00, l52:12.00, est:true},
+  {ticker:'CCAF',name:'CEC Africa Investments Ltd',          sector:'Financial',  price:0.80,  prev:0.80,  vol:null, val:null,   eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'CECZ',name:'Copperbelt Energy Corporation Plc',   sector:'Utilities',  price:15.42, prev:15.44, vol:10800,val:167100, eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'CHIL',name:'Lafarge Zambia Plc',                  sector:'Industrials',price:62.44, prev:62.99, vol:1100, val:65600,  eps:5.20, bvps:52.00,div:1.50, h52:95.00, l52:60.00, est:true},
+  {ticker:'DCZM',name:'Dot Com Zambia Plc',                  sector:'Technology', price:24.60, prev:24.60, vol:112,  val:2800,   eps:0.80, bvps:12.00,div:0,    h52:30.00, l52:12.30, est:true},
+  {ticker:'KLRE',name:'Klapton Reinsurance Plc',             sector:'Insurance',  price:0.36,  prev:0.36,  vol:39800,val:14300,  eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'MAFS',name:'Madison Financial Services Plc',      sector:'Financial',  price:1.81,  prev:1.81,  vol:null, val:null,   eps:0.18, bvps:1.50, div:0.05, h52:2.20,  l52:1.40,  est:true},
+  {ticker:'NATB',name:'National Breweries Plc',              sector:'Consumer',   price:2.60,  prev:2.60,  vol:182,  val:473,    eps:0.30, bvps:2.10, div:0.08, h52:3.80,  l52:2.20,  est:true},
+  {ticker:'PUMA',name:'Puma Energy Zambia Plc',              sector:'Energy',     price:2.43,  prev:2.43,  vol:5200, val:12600,  eps:0.22, bvps:1.85, div:0.06, h52:4.20,  l52:2.40,  est:true},
+  {ticker:'REIZ',name:'Real Estate Investments Zambia Plc',  sector:'Real Estate',price:0.14,  prev:0.14,  vol:21500,val:3000,   eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'SCBL',name:'Standard Chartered Bank Zambia Plc',  sector:'Financial',  price:1.22,  prev:1.22,  vol:10300,val:12600,  eps:0.18, bvps:2.10, div:0.05, h52:2.60,  l52:1.10,  est:true},
+  {ticker:'SHOP',name:'Shoprite Holdings Ltd',                sector:'Consumer',   price:350.00,prev:350.00,vol:26,   val:9100,   eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'ZABR',name:'Zambian Breweries Plc',                sector:'Consumer',   price:6.70,  prev:6.70,  vol:210,  val:1400,   eps:0.55, bvps:5.20, div:0.18, h52:8.50,  l52:5.80,  est:true},
+  {ticker:'ZCCM',name:'ZCCM Investments Holdings Plc',        sector:'Materials',  price:140.00,prev:140.00,vol:6,    val:840,    eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'ZFCO',name:'ZAFFICO Plc',                          sector:'Materials',  price:8.53,  prev:8.53,  vol:323,  val:2800,   eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'ZMBF',name:'Zambeef Products Plc',                 sector:'Consumer',   price:1.89,  prev:1.89,  vol:10100,val:19200,  eps:0.22, bvps:3.20, div:0.04, h52:4.00,  l52:1.80,  est:true},
+  {ticker:'ZMFA',name:'Metal Fabricators of Zambia Plc',      sector:'Industrials',price:38.00, prev:38.00, vol:40,   val:1500,   eps:null, bvps:null, div:null, h52:null,  l52:null,  est:true},
+  {ticker:'ZMRE',name:'Zambia Reinsurance Plc',               sector:'Insurance',  price:2.72,  prev:2.72,  vol:null, val:null,   eps:0.28, bvps:2.50, div:0.08, h52:3.20,  l52:2.00,  est:true},
+  {ticker:'ZNCO',name:'Zambia National Commercial Bank Plc',  sector:'Financial',  price:9.41,  prev:9.41,  vol:22800,val:214900, eps:0.80, bvps:7.20, div:0.488,h52:9.94,  l52:5.91,  est:true},
+  {ticker:'ZSUG',name:'Zambia Sugar Plc',                     sector:'Consumer',   price:69.96, prev:69.97, vol:60300,val:4220000,eps:6.50, bvps:45.00,div:2.00, h52:75.12, l52:36.10, est:true},
 ];
 
 // ─── STATE ──────────────────────────────────────────────
-const WDEF = {pe:2.0,pb:1.0,div:1.0,pos52:1.0,rsi:0.5};
-const WLBL = {pe:'P/E ratio',pb:'P/B ratio',div:'Dividend yield',pos52:'52-week position',rsi:'RSI'};
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const WDEF = {pe:2.0,pb:1.0,div:1.0,pos52:0.75};
+const WLBL = {pe:'P/E ratio',pb:'P/B ratio',div:'Dividend yield',pos52:'52-week position'};
 let W = {...WDEF};
-let sortK='score', sortD=-1;
-let charts={}, flashMap={};
-let editIdx=null, detailT=null, autoTimer=null, fetchIP=false, progTimer=null, wtTimer=null;
+let sortK='score', sortD=-1, charts={}, flashMap={}, HIST={}, priceDate=SEED_DATE, priceSource='Seed data';
+let editIdx=null, detailT=null, wtTimer=null;
 let portfolio = loadPort();
 
-const SIG_CLS  = {'Strong Buy':'sig-sb','Buy':'sig-b','Hold':'sig-h','Sell':'sig-s','Strong Sell':'sig-ss'};
-const SIG_COL  = {'Strong Buy':'#5fb462','Buy':'#8fca91','Hold':'#d3a33a','Sell':'#dc7f40','Strong Sell':'#e0565b'};
-const SIG_RANK = {'Strong Buy':5,'Buy':4,'Hold':3,'Sell':2,'Strong Sell':1};
+const SIGS     = ['Strong Buy','Buy','Hold','Sell','Strong Sell','Not rated'];
+const SIG_CLS  = {'Strong Buy':'sig-sb','Buy':'sig-b','Hold':'sig-h','Sell':'sig-s','Strong Sell':'sig-ss','Not rated':'sig-nr'};
+const SIG_COL  = {'Strong Buy':'#5fb462','Buy':'#8fca91','Hold':'#d3a33a','Sell':'#dc7f40','Strong Sell':'#e0565b','Not rated':'#474d46'};
+const SIG_RANK = {'Strong Buy':5,'Buy':4,'Hold':3,'Sell':2,'Strong Sell':1,'Not rated':0};
 const VAL_RANK = {'Undervalued':3,'Fair Value':2,'Overvalued':1};
+const DQ_LBL   = {res:'From results',est:'Estimate',none:'Awaiting results'};
+const DQ_RANK  = {res:3,est:2,none:1};
+const LIQ_LBL  = ['No trades','Thin','Moderate','High'];
 const SEC_COL  = {Financial:'#5fb462',Consumer:'#8fca91',Utilities:'#b5dcb6',Materials:'#7d857c',Insurance:'#3e613c',Telecoms:'#6fa872',Industrials:'#a9b8a8',Energy:'#d3a33a','Real Estate':'#90a88f',Technology:'#c3e8c4'};
 const $ = id => document.getElementById(id);
 
@@ -509,38 +527,65 @@ function loadPort(){try{return JSON.parse(localStorage.getItem('ac_port')||'[]')
 function savePort(){try{localStorage.setItem('ac_port',JSON.stringify(portfolio));}catch(e){}}
 
 // ─── METRICS ────────────────────────────────────────────
+const has = v => v!==null && v!==undefined && !Number.isNaN(v);
+
+function liq(s){
+  const h=HIST[s.ticker];
+  let value=has(s.val)?s.val:null, basis='latest session', freq=null;
+  if(h&&h.length>=5){
+    const w=h.slice(-20);
+    value=w.reduce((a,r)=>a+(+r.val||0),0)/w.length;
+    freq=Math.round(w.filter(r=>+r.v>0).length/w.length*100);
+    basis=`${w.length}-session average`;
+  }
+  const tier=!value||value<=0?0:value>=100000?3:value>=10000?2:1;
+  return {value,basis,freq,tier,label:LIQ_LBL[tier]};
+}
+function range52(s){
+  const h=HIST[s.ticker];
+  if(h&&h.length>=240){const c=h.slice(-250).map(r=>+r.c).filter(v=>v>0);return {lo:Math.min(...c),hi:Math.max(...c),src:'price history'};}
+  if(has(s.h52)&&has(s.l52)&&s.h52>s.l52) return {lo:Math.min(s.l52,s.price),hi:Math.max(s.h52,s.price),src:s.est?'estimate':'entered'};
+  return null;
+}
 function calc(s){
-  const pe  = s.eps>0 ? s.price/s.eps : null;
-  const pb  = s.bvps>0 ? s.price/s.bvps : null;
-  const roe = (s.eps>0&&s.bvps>0) ? s.eps/s.bvps*100 : null;
+  const L=liq(s), rg=range52(s);
+  const rated=has(s.eps)&&has(s.bvps);
+  const pe  = rated&&s.eps>0 ? s.price/s.eps : null;
+  const pb  = has(s.bvps)&&s.bvps>0 ? s.price/s.bvps : null;
+  const roe = rated&&s.bvps>0 ? s.eps/s.bvps*100 : null;
   const ey  = pe ? 100/pe : null;
-  const divYield = s.div>0 ? s.div/s.price*100 : 0;
-  const rng = s.h52-s.l52;
-  const pos52w = rng>0 ? Math.max(0,Math.min(100,Math.round((s.price-s.l52)/rng*100))) : 50;
+  const divYield = has(s.div) ? s.div/s.price*100 : null;
+  const pos52w = rg ? Math.round((s.price-rg.lo)/(rg.hi-rg.lo)*100) : null;
   const change = s.prev>0 ? (s.price-s.prev)/s.prev*100 : 0;
   let graham=null, mos=null;
-  if(s.eps>0&&s.bvps>0){graham=Math.sqrt(22.5*s.eps*s.bvps);mos=(1-s.price/graham)*100;}
-  let valuation='Fair Value';
-  if(graham!==null){if(s.price<graham*.85)valuation='Undervalued';else if(s.price>graham*1.15)valuation='Overvalued';}
-  else if(pb!==null){if(pb<.85)valuation='Undervalued';else if(pb>2.5)valuation='Overvalued';}
-  let sc=0;
-  if(pe!==null) sc += pe<8?W.pe:pe<12?W.pe*.75:pe<18?W.pe*.5:pe<25?W.pe*.25:0;
-  if(pb!==null) sc += pb<.8?W.pb:pb<1.5?W.pb*.7:pb<2.5?W.pb*.3:0;
-  sc += divYield>6?W.div:divYield>4?W.div*.7:divYield>2?W.div*.4:0;
-  if(pos52w<25) sc+=W.pos52; else if(pos52w<40) sc+=W.pos52*.5; else if(pos52w>80) sc-=W.pos52*.3;
-  if(s.rsi<30) sc+=W.rsi; else if(s.rsi>70) sc-=W.rsi;
-  const max=(W.pe+W.pb+W.div+W.pos52+W.rsi)||1;
-  const score=Math.min(5,Math.max(0,sc/max*5));
-  const signal=score>=4.2?'Strong Buy':score>=3.2?'Buy':score>=2.2?'Hold':score>=1.2?'Sell':'Strong Sell';
-  return {pe,pb,roe,ey,divYield,pos52w,change,graham,mos,valuation,score,signal};
+  if(rated&&s.eps>0&&s.bvps>0){graham=Math.sqrt(22.5*s.eps*s.bvps);mos=(1-s.price/graham)*100;}
+  let valuation=null, score=null, signal='Not rated';
+  if(rated){
+    valuation='Fair Value';
+    if(graham!==null){if(s.price<graham*.85)valuation='Undervalued';else if(s.price>graham*1.15)valuation='Overvalued';}
+    else if(pb!==null){if(pb<.85)valuation='Undervalued';else if(pb>2.5)valuation='Overvalued';}
+    let sc=0,max=0;
+    max+=W.pe; if(pe!==null) sc+=pe<8?W.pe:pe<12?W.pe*.75:pe<18?W.pe*.5:pe<25?W.pe*.25:0;
+    max+=W.pb; if(pb!==null) sc+=pb<.8?W.pb:pb<1.5?W.pb*.7:pb<2.5?W.pb*.3:0;
+    if(divYield!==null){max+=W.div; sc+=divYield>6?W.div:divYield>4?W.div*.7:divYield>2?W.div*.4:0;}
+    if(pos52w!==null){max+=W.pos52; if(pos52w<25)sc+=W.pos52; else if(pos52w<40)sc+=W.pos52*.5; else if(pos52w>80)sc-=W.pos52*.3;}
+    score=max>0?Math.min(5,Math.max(0,sc/max*5)):0;
+    signal=score>=4.2?'Strong Buy':score>=3.2?'Buy':score>=2.2?'Hold':score>=1.2?'Sell':'Strong Sell';
+  }
+  const dq=!rated?'none':s.est?'est':'res';
+  return {pe,pb,roe,ey,divYield,pos52w,range:rg,change,graham,mos,valuation,score,signal,rated,dq,dqRank:DQ_RANK[dq],
+          liq:L,liqValue:L.value,liqSort:L.tier*1e12+(L.value||0)};
 }
 const withCalc = () => stocks.map(s=>({...s,...calc(s)}));
 
 // ─── FORMAT + UI HELPERS ────────────────────────────────
 const K = v => 'K '+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const pct = (v,d=2,sign=true) => (sign&&v>0?'+':'')+v.toFixed(d)+'%';
+const Kc = v => { if(!has(v)) return '–'; if(v>=1e6) return 'K '+(v/1e6).toFixed(2)+'m'; if(v>=1e3) return 'K '+(v/1e3).toFixed(1)+'k'; return 'K '+Math.round(v); };
+const pct = (v,d=2) => (v>0?'+':'')+v.toFixed(d)+'%';
+const fmtDate = d => new Date(d.length<=10?d+'T12:00:00':d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 const sig = s => `<span class="sig ${SIG_CLS[s]}"><i></i>${s}</span>`;
 const sec = s => `<span class="sec"><i style="background:${SEC_COL[s]||'#777'}"></i>${s}</span>`;
+const tier = L => `<span class="tier t${L.tier}"><span class="bars"><b></b><b></b><b></b></span>${L.label}</span>`;
 const chip = v => `<span class="chip ${v>0?'up':v<0?'dn':'flat'}">${pct(v)}</span>`;
 const mini = (p,col,label) => `<span class="mini"><span class="mini-t"><span class="mini-f" data-w="${Math.max(0,Math.min(100,p))}%" style="background:${col}"></span></span><span class="mini-v">${label}</span></span>`;
 
@@ -560,18 +605,11 @@ function countUp(el,to,fmt=v=>Math.round(v).toString()){
 function toast(msg,type=''){
   const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;$('toasts').appendChild(t);
   requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('in')));
-  setTimeout(()=>{t.classList.remove('in');setTimeout(()=>t.remove(),400);},3400);
+  setTimeout(()=>{t.classList.remove('in');setTimeout(()=>t.remove(),400);},3600);
 }
 function setStatus(st,msg){$('sDot').className='dot'+(st?' '+st:'');$('sTxt').textContent=msg;}
 function setProg(p){const f=$('progFill');f.style.opacity=1;f.style.width=p+'%';}
 function endProg(){setProg(100);setTimeout(()=>{$('progFill').style.opacity=0;setTimeout(()=>$('progFill').style.width='0',450);},300);}
-function log(msg,type=''){
-  const bar=$('logBar');bar.classList.add('vis');
-  const el=document.createElement('div');el.className='le '+type;
-  el.textContent=`${new Date().toLocaleTimeString('en-GB',{hour12:false})}  ${msg}`;
-  bar.insertBefore(el,bar.firstChild);
-  while(bar.children.length>12) bar.removeChild(bar.lastChild);
-}
 
 // ─── MODALS ─────────────────────────────────────────────
 function openModal(id){const m=$(id);m.classList.add('open');requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('show')));}
@@ -593,37 +631,40 @@ function switchTab(id){
   moveInd();
   if(id==='overview') renderOverview();
   if(id==='screener') renderTable(true);
-  if(id==='analytics'){
-    if(charts.score){renderAnalytics(true);Object.values(charts).forEach(c=>{c.$stag=true;c.reset();c.update();});}
-    else renderAnalytics(true);
-  }
+  if(id==='analytics'){const fresh=!charts.score;renderAnalytics(true);if(!fresh)Object.values(charts).forEach(c=>{c.$stag=true;c.reset();c.update();});}
   if(id==='portfolio') renderPortfolio();
 }
 
 // ─── OVERVIEW ───────────────────────────────────────────
 function renderOverview(){
   const all=withCalc();
-  const c={'Strong Buy':0,'Buy':0,'Hold':0,'Sell':0,'Strong Sell':0};
-  all.forEach(s=>c[s.signal]++);
+  const c={};SIGS.forEach(k=>c[k]=0);all.forEach(s=>c[s.signal]++);
   countUp($('k-sb'),c['Strong Buy']);countUp($('k-b'),c['Buy']);countUp($('k-h'),c['Hold']);
   countUp($('k-s'),c['Sell']);countUp($('k-ss'),c['Strong Sell']);
-  countUp($('k-uv'),all.filter(s=>s.valuation==='Undervalued').length);
-  $('k-uv-s').textContent=`Of ${all.length} stocks, below Graham value`;
-  countUp($('k-dy'),all.reduce((a,s)=>a+s.divYield,0)/all.length,v=>v.toFixed(2)+'%');
-  const pes=all.filter(s=>s.pe!==null).map(s=>s.pe).sort((a,b)=>a-b);
-  const n=pes.length, med=n?(n%2?pes[(n-1)/2]:(pes[n/2-1]+pes[n/2])/2):0;
-  countUp($('k-pe'),med,v=>v.toFixed(1)+'×');
+  const rated=all.filter(s=>s.rated);
+  countUp($('k-uv'),rated.filter(s=>s.valuation==='Undervalued').length);
+  $('k-uv-s').textContent=`Of ${rated.length} rated stocks`;
+  const dys=all.filter(s=>s.divYield!==null);
+  countUp($('k-dy'),dys.length?dys.reduce((a,s)=>a+s.divYield,0)/dys.length:0,v=>v.toFixed(2)+'%');
+  const totVal=all.reduce((a,s)=>a+(s.val||0),0);
+  countUp($('k-vt'),totVal,v=>Kc(v));
+  $('k-vt-s').textContent=`${all.filter(s=>s.vol>0).length} of ${all.length} stocks traded`;
 
-  const byChg=[...all].sort((a,b)=>b.change-a.change);
-  const row=(s,i)=>`<div class="mv rin" style="animation-delay:${i*45}ms" onclick="openDetail('${s.ticker}')">
+  const traded=[...all].filter(s=>s.val>0).sort((a,b)=>b.val-a.val).slice(0,6);
+  const topV=traded.length?traded[0].val:1;
+  $('mostTraded').innerHTML=traded.map(s=>`
+    <div class="hbar" style="cursor:pointer" onclick="openDetail('${s.ticker}')"><span class="hbar-l">${s.ticker}</span><span class="hbar-t"><span class="hbar-f" style="display:block;background:var(--brand2)" data-w="${Math.max(2,s.val/topV*100)}%"></span></span><span class="hbar-v" style="width:auto">${Kc(s.val)}</span></div>`).join('')
+    || `<div class="empty" style="padding:20px 0">No trades recorded in the latest session.</div>`;
+
+  const moved=[...all].filter(s=>Math.abs(s.change)>0.0001).sort((a,b)=>b.change-a.change);
+  $('movers').innerHTML=moved.length?moved.slice(0,7).map((s,i)=>`<div class="mv rin" style="animation-delay:${i*45}ms" onclick="openDetail('${s.ticker}')">
       <div style="min-width:0"><div class="mv-t">${s.ticker}</div><div class="mv-n">${s.name}</div></div>
-      <div class="mv-r">${K(s.price)}<br>${chip(s.change)}</div></div>`;
-  $('gainers').innerHTML=byChg.slice(0,5).map(row).join('');
-  $('losers').innerHTML=byChg.slice(-5).reverse().map(row).join('');
+      <div class="mv-r">${K(s.price)}<br>${chip(s.change)}</div></div>`).join('')
+    : `<div class="empty" style="padding:20px 0">Every stock closed unchanged. That is common on this market; check value traded to see where activity was.</div>`;
 
-  $('sigDist').innerHTML=Object.entries(c).map(([k,v])=>`
-    <div class="hbar"><span class="hbar-l">${k}</span><span class="hbar-t"><span class="hbar-f" style="display:block;background:${SIG_COL[k]}" data-w="${v/all.length*100}%"></span></span><span class="hbar-v">${v}</span></div>`).join('');
-  const divs=[...all].filter(s=>s.divYield>0).sort((a,b)=>b.divYield-a.divYield).slice(0,5);
+  $('sigDist').innerHTML=SIGS.map(k=>`
+    <div class="hbar"><span class="hbar-l">${k}</span><span class="hbar-t"><span class="hbar-f" style="display:block;background:${SIG_COL[k]}" data-w="${c[k]/all.length*100}%"></span></span><span class="hbar-v">${c[k]}</span></div>`).join('');
+  const divs=dys.filter(s=>s.divYield>0).sort((a,b)=>b.divYield-a.divYield).slice(0,5);
   const top=divs.length?divs[0].divYield:1;
   $('divLeaders').innerHTML=divs.map(s=>`
     <div class="hbar"><span class="hbar-l">${s.ticker}</span><span class="hbar-t"><span class="hbar-f" style="display:block;background:var(--brand2)" data-w="${s.divYield/top*100}%"></span></span><span class="hbar-v">${s.divYield.toFixed(2)}%</span></div>`).join('');
@@ -632,18 +673,20 @@ function renderOverview(){
 
 // ─── SCREENER ───────────────────────────────────────────
 function getFiltered(){
-  const f={sig:$('fSig').value,sec:$('fSec').value,val:$('fVal').value,sc:+$('fScore').value,src:$('fData').value,q:$('srchBox').value.trim().toLowerCase()};
+  const f={sig:$('fSig').value,sec:$('fSec').value,liq:+$('fLiq').value,val:$('fVal').value,dq:$('fData').value,q:$('srchBox').value.trim().toLowerCase()};
   return withCalc().filter(s=>
-    (f.sig==='all'||s.signal===f.sig)&&(f.sec==='all'||s.sector===f.sec)&&(f.val==='all'||s.valuation===f.val)&&s.score>=f.sc&&
-    (f.src==='all'||(f.src==='live'?!!s.liveSource:!s.liveSource))&&
+    (f.sig==='all'||s.signal===f.sig)&&(f.sec==='all'||s.sector===f.sec)&&s.liq.tier>=f.liq&&
+    (f.val==='all'||s.valuation===f.val)&&(f.dq==='all'||s.dq===f.dq)&&
     (!f.q||s.ticker.toLowerCase().includes(f.q)||s.name.toLowerCase().includes(f.q)));
 }
 function cmp(a,b){
   let av=a[sortK],bv=b[sortK];
   if(sortK==='signal'){av=SIG_RANK[av];bv=SIG_RANK[bv];}
-  if(sortK==='valuation'){av=VAL_RANK[av];bv=VAL_RANK[bv];}
-  if(typeof av==='string') return av.localeCompare(bv)*sortD;
-  return ((av??-1e9)-(bv??-1e9))*sortD;
+  if(sortK==='valuation'){av=VAL_RANK[av]??0;bv=VAL_RANK[bv]??0;}
+  if(typeof av==='string'&&typeof bv==='string') return av.localeCompare(bv)*sortD;
+  const na=!has(av),nb=!has(bv);
+  if(na&&nb) return 0; if(na) return 1; if(nb) return -1;   // blanks always sink to the bottom
+  return (av-bv)*sortD;
 }
 document.querySelectorAll('#scrTable th[data-k]').forEach(th=>th.addEventListener('click',()=>{
   const k=th.dataset.k;
@@ -652,46 +695,58 @@ document.querySelectorAll('#scrTable th[data-k]').forEach(th=>th.addEventListene
 }));
 function paintSort(){document.querySelectorAll('#scrTable th[data-k]').forEach(th=>{th.classList.toggle('sa',th.dataset.k===sortK&&sortD>0);th.classList.toggle('sd',th.dataset.k===sortK&&sortD<0);});}
 
+function renderNotice(){
+  const all=withCalc(), est=all.filter(s=>s.dq==='est').length, none=all.filter(s=>s.dq==='none').length;
+  const box=$('estNotice');
+  if(!est&&!none){box.style.display='none';return;}
+  box.style.display='';
+  const parts=[];
+  if(est) parts.push(`${est} stock${est>1?'s use':' uses'} estimated earnings and book value, not figures from published results, so treat their signals as indicative only.`);
+  if(none) parts.push(`${none} stock${none>1?'s are':' is'} not rated until results data is entered. Use Edit on any row to add it.`);
+  $('estText').textContent=parts.join(' ');
+}
 function renderTable(anim=true){
+  renderNotice();
   const data=getFiltered().sort(cmp);
   $('rowCount').textContent=`${data.length} of ${stocks.length} stocks`;
   paintSort();
   const tb=$('tBody');
-  if(!data.length){tb.innerHTML=`<tr><td colspan="17" class="empty">No stocks match these filters. Clear a filter to widen the search.</td></tr>`;return;}
+  if(!data.length){tb.innerHTML=`<tr><td colspan="18" class="empty">No stocks match these filters. Clear a filter to widen the search.</td></tr>`;return;}
   tb.innerHTML=data.map((s,i)=>{
     const fl=flashMap[s.ticker]?' flash-'+flashMap[s.ticker]:'';
     const peC=s.pe===null?'mut':s.pe<12?'pos':s.pe>20?'neg':'';
     const pbC=s.pb===null?'mut':s.pb<1?'pos':s.pb>2.5?'neg':'';
     const roeC=s.roe===null?'mut':s.roe>15?'pos':s.roe<5?'neg':'';
-    const dyC=s.divYield>5?'pos':s.divYield<2?'mut':'';
+    const dyC=s.divYield===null?'mut':s.divYield>5?'pos':s.divYield<2?'mut':'';
     const mosC=s.mos===null?'mut':s.mos>20?'pos':s.mos<0?'neg':'';
-    const rsiC=s.rsi<30?'var(--up)':s.rsi>70?'var(--down)':'var(--text3)';
-    const posC=s.pos52w<30?'var(--up)':s.pos52w>70?'var(--down)':'var(--amber)';
-    const valC=s.valuation==='Undervalued'?'pos':s.valuation==='Overvalued'?'neg':'';
+    const posC=s.pos52w===null?'':s.pos52w<30?'var(--up)':s.pos52w>70?'var(--down)':'var(--amber)';
+    const valC=s.valuation==='Undervalued'?'pos':s.valuation==='Overvalued'?'neg':s.valuation?'':'mut';
+    const noTrade=!(s.vol>0);
     return `<tr class="${anim?'rin':''}${fl}" style="animation-delay:${anim?Math.min(i*22,420):0}ms" onclick="openDetail('${s.ticker}')">
       <td class="l"><div class="tk">${s.ticker}</div><div class="tn">${s.name}</div></td>
       <td class="l">${sec(s.sector)}</td>
       <td class="px">${K(s.price)}</td>
-      <td class="${s.change>0?'pos':s.change<0?'neg':'mut'}">${pct(s.change)}</td>
+      <td class="${noTrade?'mut':s.change>0?'pos':s.change<0?'neg':'mut'}">${noTrade?'No trade':pct(s.change)}</td>
+      <td class="${s.liq.value?'':'mut'}">${Kc(s.liq.value)}</td>
+      <td class="l">${tier(s.liq)}</td>
       <td class="${peC}">${s.pe!==null?s.pe.toFixed(1)+'×':'–'}</td>
       <td class="${pbC}">${s.pb!==null?s.pb.toFixed(2)+'×':'–'}</td>
       <td class="${roeC}">${s.roe!==null?s.roe.toFixed(1)+'%':'–'}</td>
-      <td class="${s.ey!==null&&s.ey>8?'pos':''}">${s.ey!==null?s.ey.toFixed(1)+'%':'–'}</td>
-      <td class="${dyC}">${s.divYield.toFixed(2)}%</td>
-      <td>${mini(s.rsi,rsiC,s.rsi)}</td>
-      <td>${mini(s.pos52w,posC,s.pos52w+'%')}</td>
+      <td class="${s.ey!==null&&s.ey>8?'pos':s.ey===null?'mut':''}">${s.ey!==null?s.ey.toFixed(1)+'%':'–'}</td>
+      <td class="${dyC}">${s.divYield!==null?s.divYield.toFixed(2)+'%':'–'}</td>
+      <td>${s.pos52w!==null?mini(s.pos52w,posC,s.pos52w+'%'):'<span class="mut">–</span>'}</td>
       <td class="${mosC}">${s.mos!==null?pct(s.mos,1):'–'}</td>
-      <td>${mini(s.score/5*100,SIG_COL[s.signal],s.score.toFixed(1))}</td>
-      <td class="${valC}">${s.valuation}</td>
+      <td>${s.score!==null?mini(s.score/5*100,SIG_COL[s.signal],s.score.toFixed(1)):'<span class="mut">–</span>'}</td>
+      <td class="${valC}">${s.valuation||'–'}</td>
       <td class="l">${sig(s.signal)}</td>
-      <td class="l"><span class="src${s.liveSource?' live':''}">${s.liveSource?'Live':'Manual'}</span></td>
+      <td class="l"><span class="dq dq-${s.dq}">${DQ_LBL[s.dq]}</span></td>
       <td><button class="btn btn-sm edit-btn" onclick="event.stopPropagation();openEdit('${s.ticker}')">Edit</button></td>
     </tr>`;
   }).join('');
   flashMap={};
   growBars(tb);
 }
-function resetFilters(){['fSig','fSec','fVal','fData'].forEach(id=>$(id).value='all');$('fScore').value='0';$('srchBox').value='';renderTable(true);}
+function resetFilters(){['fSig','fSec','fVal','fData'].forEach(id=>$(id).value='all');$('fLiq').value='0';$('srchBox').value='';renderTable(true);}
 
 // ─── ANALYTICS ──────────────────────────────────────────
 Chart.defaults.font.family="'IBM Plex Sans',sans-serif";
@@ -700,45 +755,53 @@ Chart.defaults.color='#6b726a';
 Chart.defaults.borderColor='#1b1f1b';
 const TT={backgroundColor:'#121512',borderColor:'#2c322c',borderWidth:1,padding:10,cornerRadius:6,titleColor:'#e9ece8',bodyColor:'#aab1a9',displayColors:false,titleFont:{weight:'600'}};
 const stagger={id:'stagger',beforeInit(c){c.$stag=true;}};
-function anim(extra={}){return {duration:RM?0:950,easing:'easeOutQuart',onComplete:a=>{a.chart.$stag=false;},delay:ctx=>(!RM&&ctx.type==='data'&&ctx.chart.$stag)?ctx.dataIndex*28:0,...extra};}
+const anim=()=>({duration:RM?0:950,easing:'easeOutQuart',onComplete:a=>{a.chart.$stag=false;},delay:ctx=>(!RM&&ctx.type==='data'&&ctx.chart.$stag)?ctx.dataIndex*28:0});
 
+function analyticsData(){
+  const rated=withCalc().filter(s=>s.rated).sort((a,b)=>b.score-a.score);
+  return {
+    rated,
+    liqPts:rated.map(s=>({x:Math.max(s.liq.value||0,100),y:s.score,t:s.ticker,sig:s.signal,v:s.liq.value})),
+    bub:rated.filter(s=>s.pe!==null).map(s=>({x:Math.min(s.pe,40),y:s.divYield||0,r:4+s.score*2.4,t:s.ticker,sig:s.signal}))
+  };
+}
+function paintPts(ds,pts,alpha){ds.data=pts;ds.backgroundColor=pts.map(p=>SIG_COL[p.sig]+alpha);ds.borderColor=pts.map(p=>SIG_COL[p.sig]);ds.hoverBackgroundColor=pts.map(p=>SIG_COL[p.sig]+'cc');}
 function renderAnalytics(heat=true){
-  const all=withCalc();
-  const sorted=[...all].sort((a,b)=>b.score-a.score);
-  const secMap={};all.forEach(s=>secMap[s.sector]=(secMap[s.sector]||0)+1);
-  const bub=all.filter(s=>s.pe!==null).map(s=>({x:Math.min(s.pe,40),y:s.divYield,r:4+s.score*2.4,t:s.ticker,sig:s.signal}));
+  const d=analyticsData();
   if(!charts.score){
     charts.score=new Chart($('chScore'),{type:'bar',plugins:[stagger],
-      data:{labels:sorted.map(s=>s.ticker),datasets:[{data:sorted.map(s=>s.score),backgroundColor:sorted.map(s=>SIG_COL[s.signal]+'b0'),hoverBackgroundColor:sorted.map(s=>SIG_COL[s.signal]),borderRadius:4,borderSkipped:false,maxBarThickness:20}]},
+      data:{labels:d.rated.map(s=>s.ticker),datasets:[{data:d.rated.map(s=>s.score),backgroundColor:d.rated.map(s=>SIG_COL[s.signal]+'b0'),hoverBackgroundColor:d.rated.map(s=>SIG_COL[s.signal]),borderRadius:4,borderSkipped:false,maxBarThickness:22}]},
       options:{responsive:true,maintainAspectRatio:false,animation:anim(),
-        plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:i=>`Score ${i.raw.toFixed(2)}, ${sorted[i.dataIndex]?withCalc().find(s=>s.ticker===i.label).signal:''}`}}},
-        scales:{x:{grid:{display:false},ticks:{font:{size:10},maxRotation:60,minRotation:60}},y:{min:0,max:5,border:{display:false},ticks:{stepSize:1}}}}});
-    charts.sector=new Chart($('chSector'),{type:'doughnut',plugins:[stagger],
-      data:{labels:Object.keys(secMap),datasets:[{data:Object.values(secMap),backgroundColor:Object.keys(secMap).map(k=>SEC_COL[k]||'#777'),borderColor:'#0c0e0c',borderWidth:3,hoverOffset:8}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'66%',animation:{duration:RM?0:1100,easing:'easeOutQuart',animateRotate:true,animateScale:false},
-        plugins:{tooltip:TT,legend:{position:'right',labels:{usePointStyle:true,pointStyle:'rectRounded',boxWidth:8,boxHeight:8,padding:12,color:'#9aa199',font:{size:12}}}}}});
+        plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:i=>`Score ${(+i.raw).toFixed(2)}`}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{min:0,max:5,border:{display:false},ticks:{stepSize:1}}}}});
+    charts.liq=new Chart($('chLiq'),{type:'scatter',plugins:[stagger],
+      data:{datasets:[{data:[],pointRadius:6,pointHoverRadius:8,borderWidth:1.5}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:anim(),
+        plugins:{legend:{display:false},tooltip:{...TT,callbacks:{title:i=>i[0].raw.t,label:i=>`Score ${i.raw.y.toFixed(2)}, ${i.raw.v?Kc(i.raw.v)+' traded':'no trades'}`}}},
+        scales:{x:{type:'logarithmic',min:100,title:{display:true,text:'Value traded (K, log scale)',color:'#666d65'},border:{display:false},ticks:{callback:v=>[100,1e3,1e4,1e5,1e6,1e7].includes(v)?Kc(v):''}},
+                y:{min:0,max:5,title:{display:true,text:'Score',color:'#666d65'},border:{display:false},ticks:{stepSize:1}}}}});
     charts.bub=new Chart($('chBub'),{type:'bubble',plugins:[stagger],
-      data:{datasets:[{data:bub,backgroundColor:bub.map(d=>SIG_COL[d.sig]+'5c'),borderColor:bub.map(d=>SIG_COL[d.sig]),hoverBackgroundColor:bub.map(d=>SIG_COL[d.sig]+'aa'),borderWidth:1.5}]},
+      data:{datasets:[{data:[],borderWidth:1.5}]},
       options:{responsive:true,maintainAspectRatio:false,animation:anim(),
         plugins:{legend:{display:false},tooltip:{...TT,callbacks:{title:i=>i[0].raw.t,label:i=>`P/E ${i.raw.x.toFixed(1)}×, yield ${i.raw.y.toFixed(2)}%, ${i.raw.sig}`}}},
         scales:{x:{title:{display:true,text:'P/E ratio',color:'#666d65'},border:{display:false},min:0},y:{title:{display:true,text:'Dividend yield (%)',color:'#666d65'},border:{display:false},min:0}}}});
-    charts.bub.$stag=true;
+    paintPts(charts.liq.data.datasets[0],d.liqPts,'70');charts.liq.update();
+    paintPts(charts.bub.data.datasets[0],d.bub,'5c');charts.bub.update();
   } else {
     const c=charts.score,ds=c.data.datasets[0];
-    c.data.labels=sorted.map(s=>s.ticker);ds.data=sorted.map(s=>s.score);
-    ds.backgroundColor=sorted.map(s=>SIG_COL[s.signal]+'b0');ds.hoverBackgroundColor=sorted.map(s=>SIG_COL[s.signal]);c.update();
-    const d=charts.sector;d.data.labels=Object.keys(secMap);d.data.datasets[0].data=Object.values(secMap);d.data.datasets[0].backgroundColor=Object.keys(secMap).map(k=>SEC_COL[k]||'#777');d.update();
-    const b=charts.bub,bd=b.data.datasets[0];bd.data=bub;bd.backgroundColor=bub.map(x=>SIG_COL[x.sig]+'5c');bd.borderColor=bub.map(x=>SIG_COL[x.sig]);bd.hoverBackgroundColor=bub.map(x=>SIG_COL[x.sig]+'aa');b.update();
+    c.data.labels=d.rated.map(s=>s.ticker);ds.data=d.rated.map(s=>s.score);
+    ds.backgroundColor=d.rated.map(s=>SIG_COL[s.signal]+'b0');ds.hoverBackgroundColor=d.rated.map(s=>SIG_COL[s.signal]);c.update();
+    paintPts(charts.liq.data.datasets[0],d.liqPts,'70');charts.liq.update();
+    paintPts(charts.bub.data.datasets[0],d.bub,'5c');charts.bub.update();
   }
-  if(heat) renderHeat(all);
+  if(heat) renderLiqHeat();
   if(!$('wtSliders').dataset.built) buildWeights();
 }
-function renderHeat(all){
-  $('rsiHeat').innerHTML=[...all].sort((a,b)=>a.rsi-b.rsi).map((s,i)=>{
-    const col=s.rsi<30?'var(--up)':s.rsi>70?'var(--down)':s.rsi>=60?'var(--amber)':'var(--text2)';
-    const bg=s.rsi<30?'rgba(95,180,98,.12)':s.rsi>70?'rgba(224,86,91,.12)':s.rsi>=60?'rgba(211,163,58,.07)':'var(--s2)';
-    return `<div class="ht" title="${s.name}, RSI ${s.rsi}" style="background:${bg};animation-delay:${i*22}ms"><div class="ht-t">${s.ticker}</div><div class="ht-v" style="color:${col}">${s.rsi}</div></div>`;
-  }).join('');
+function renderLiqHeat(){
+  const col=['var(--text4)','var(--amber)','#8fca91','var(--up)'];
+  const bg=['var(--s2)','rgba(211,163,58,.08)','rgba(143,202,145,.08)','rgba(95,180,98,.12)'];
+  $('liqHeat').innerHTML=withCalc().sort((a,b)=>b.liqSort-a.liqSort).map((s,i)=>
+    `<div class="ht" title="${s.name}: ${s.liq.label}" style="background:${bg[s.liq.tier]};animation-delay:${i*22}ms;cursor:pointer" onclick="openDetail('${s.ticker}')"><div class="ht-t">${s.ticker}</div><div class="ht-v" style="color:${col[s.liq.tier]};font-size:13px">${s.liq.value?Kc(s.liq.value):'None'}</div></div>`).join('');
 }
 function paintRange(inp){const p=(inp.value-inp.min)/(inp.max-inp.min)*100;inp.style.background=`linear-gradient(90deg,var(--up) ${p}%,var(--line2) ${p}%)`;}
 function buildWeights(){
@@ -798,54 +861,71 @@ function removePosition(t){portfolio=portfolio.filter(p=>p.ticker!==t);savePort(
 
 // ─── DETAIL / EDIT / ADD ────────────────────────────────
 function openDetail(t){
-  const s=stocks.find(x=>x.ticker===t);if(!s)return;detailT=t;const m=calc(s);
+  const s=stocks.find(x=>x.ticker===t);if(!s)return;detailT=t;const m=calc(s),L=m.liq;
   $('dm-tick').textContent=s.ticker;$('dm-name').textContent=s.name;$('dm-sec').innerHTML=sec(s.sector);
   $('dm-price').textContent=K(s.price);
-  $('dm-chg').innerHTML=`<span class="${m.change>0?'pos':m.change<0?'neg':'mut'}">${pct(m.change)}</span> <span class="mut">from ${K(s.prev)}</span>`;
+  $('dm-chg').innerHTML=s.vol>0?`<span class="${m.change>0?'pos':m.change<0?'neg':'mut'}">${pct(m.change)}</span> <span class="mut">from ${K(s.prev)}</span>`:`<span class="mut">No trade in the latest session</span>`;
+  const na=m.rated?'n/a':'Awaiting results';
   const cards=[
-    ['P/E ratio',m.pe!==null?m.pe.toFixed(2)+'×':'n/a','Price over earnings'],
-    ['P/B ratio',m.pb!==null?m.pb.toFixed(2)+'×':'n/a','Price over book value'],
-    ['Return on equity',m.roe!==null?m.roe.toFixed(1)+'%':'n/a','Earnings over book value'],
-    ['Earnings yield',m.ey!==null?m.ey.toFixed(2)+'%':'n/a','Compare with bond yields'],
-    ['Dividend yield',m.divYield.toFixed(2)+'%',`${K(s.div)} a year`],
-    ['Graham number',m.graham!==null?K(m.graham):'n/a','Estimated fair value'],
-    ['Margin of safety',m.mos!==null?pct(m.mos,1):'n/a',m.mos===null?'Needs positive earnings':m.mos>0?'Discount to fair value':'Premium to fair value'],
-    ['RSI',s.rsi,s.rsi<30?'Oversold':s.rsi>70?'Overbought':'Neutral momentum'],
-    ['Valuation',m.valuation,'Against Graham number'],
+    ['P/E ratio',m.pe!==null?m.pe.toFixed(2)+'×':na,'Price over earnings'],
+    ['P/B ratio',m.pb!==null?m.pb.toFixed(2)+'×':na,'Price over book value'],
+    ['Return on equity',m.roe!==null?m.roe.toFixed(1)+'%':na,'Earnings over book value'],
+    ['Earnings yield',m.ey!==null?m.ey.toFixed(2)+'%':na,'Compare with Treasury bill yields'],
+    ['Dividend yield',m.divYield!==null?m.divYield.toFixed(2)+'%':na,has(s.div)?`${K(s.div)} over 12 months`:'No dividend data'],
+    ['Graham number',m.graham!==null?K(m.graham):na,'Estimated fair value'],
+    ['Margin of safety',m.mos!==null?pct(m.mos,1):na,m.mos===null?'Needs positive earnings':m.mos>0?'Discount to fair value':'Premium to fair value'],
+    ['Liquidity',L.label,L.value?`${Kc(L.value)}, ${L.basis}`:'Nothing traded recently'],
+    ['Fundamentals',DQ_LBL[m.dq],m.dq==='res'?'Taken from published results':m.dq==='est'?'Placeholder figures':'Add them with Edit data'],
   ];
   $('dm-metrics').innerHTML=cards.map((c,i)=>`<div class="mm" style="animation-delay:${80+i*35}ms"><div class="mm-l">${c[0]}</div><div class="mm-v">${c[1]}</div><div class="mm-s">${c[2]}</div></div>`).join('');
-  const mk=$('dm-marker');mk.style.transition='none';mk.style.left='0%';
-  $('dm-pos').textContent=`${m.pos52w}% of range`;
-  $('dm-lo').textContent='Low '+K(s.l52);$('dm-hi').textContent='High '+K(s.h52);
-  $('dm-verdict').innerHTML=`<div class="verdict-sc" id="dm-score" style="color:${SIG_COL[m.signal]}">0.0</div>
-    <div style="flex:1">${sig(m.signal)}<div class="mm-s" style="margin-top:6px">Composite score out of 5, using the current weights</div></div>
-    <span class="src${s.liveSource?' live':''}">${s.liveSource?'Live price':'Manual data'}</span>`;
+
+  if(L.tier===0){
+    $('dm-cap').innerHTML=`<b>No shares changed hands recently.</b> The quoted price may be out of date. Ask a broker for the current best bid and offer before placing an order.`;
+  } else {
+    const n=Math.ceil(100000/(0.2*L.value));
+    $('dm-cap').innerHTML=`<b>${Kc(L.value)}</b> traded (${L.basis})${L.freq!==null?`, with trades on ${L.freq}% of recent sessions`:''}. Taking a fifth of that daily value, a <b>K100,000</b> position would take about <b>${n} session${n>1?'s':''}</b> to build or sell.`;
+  }
+
+  const mk=$('dm-marker');
+  if(m.range){
+    $('dm-range').style.display='';mk.style.transition='none';mk.style.left='0%';
+    $('dm-pos').textContent=`${m.pos52w}% of range${m.range.src==='estimate'?', estimated range':''}`;
+    $('dm-lo').textContent='Low '+K(m.range.lo);$('dm-hi').textContent='High '+K(m.range.hi);
+  } else $('dm-range').style.display='none';
+
+  $('dm-verdict').innerHTML=m.rated
+    ? `<div class="verdict-sc" id="dm-score" style="color:${SIG_COL[m.signal]}">0.0</div>
+       <div style="flex:1">${sig(m.signal)}<div class="mm-s" style="margin-top:6px">Composite score out of 5${m.dq==='est'?', based on estimated fundamentals':''}</div></div>
+       <span class="tier t${L.tier}" title="Liquidity"><span class="bars"><b></b><b></b><b></b></span>${L.label}</span>`
+    : `<div style="flex:1">${sig('Not rated')}<div class="mm-s" style="margin-top:6px">Enter earnings per share and book value per share from the latest results to score this stock.</div></div>`;
   openModal('detailModal');
-  setTimeout(()=>{mk.style.transition='';mk.style.left=m.pos52w+'%';countUp($('dm-score'),m.score,v=>v.toFixed(1));},140);
+  setTimeout(()=>{if(m.range){mk.style.transition='';mk.style.left=m.pos52w+'%';}if(m.rated)countUp($('dm-score'),m.score,v=>v.toFixed(1));},140);
 }
 function editFromDetail(){const t=detailT;closeModal('detailModal');setTimeout(()=>openEdit(t),240);}
 function openEdit(t){
   editIdx=stocks.findIndex(x=>x.ticker===t);const s=stocks[editIdx];
   $('em-tick').textContent='Edit '+s.ticker;$('em-name').textContent=s.name;
-  [['ePrice','price'],['ePrev','prev'],['eEps','eps'],['eBvps','bvps'],['eDiv','div'],['e52h','h52'],['e52l','l52'],['eRsi','rsi']].forEach(([id,k])=>$(id).value=s[k]);
+  [['ePrice','price'],['ePrev','prev'],['eEps','eps'],['eBvps','bvps'],['eDiv','div'],['eVal','val'],['e52h','h52'],['e52l','l52']].forEach(([id,k])=>$(id).value=has(s[k])?s[k]:'');
+  $('eRes').checked=!s.est;
   openModal('editModal');
 }
 function saveEdit(){
   if(editIdx===null)return;const s=stocks[editIdx],old=s.price;
   const v=id=>$(id).value===''?null:+$(id).value;
-  s.price=v('ePrice')||s.price;s.prev=v('ePrev')||s.prev;s.eps=v('eEps')??s.eps;s.bvps=v('eBvps')||s.bvps;
-  s.div=v('eDiv')??s.div;s.h52=v('e52h')||s.h52;s.l52=v('e52l')||s.l52;s.rsi=v('eRsi')??s.rsi;s.liveSource=null;
+  s.price=v('ePrice')||s.price;s.prev=v('ePrev')||s.prev;
+  s.eps=v('eEps');s.bvps=v('eBvps');s.div=v('eDiv');s.val=v('eVal');s.h52=v('e52h');s.l52=v('e52l');
+  s.est=!$('eRes').checked;
   if(s.price!==old) flashMap[s.ticker]=s.price>old?'up':'dn';
   closeModal('editModal');renderAll(false);toast(`${s.ticker} saved`,'ok');
 }
-function openAdd(){['aTicker','aName','aPrice','aEps','aBvps','aDiv','a52h','a52l'].forEach(id=>$(id).value='');$('aRsi').value=50;openModal('addModal');setTimeout(()=>$('aTicker').focus(),250);}
+function openAdd(){['aTicker','aName','aPrice','aEps','aBvps','aDiv','a52h','a52l'].forEach(id=>$(id).value='');openModal('addModal');setTimeout(()=>$('aTicker').focus(),250);}
 function saveNew(){
   const ticker=$('aTicker').value.trim().toUpperCase(),name=$('aName').value.trim();
   if(!ticker||!name){toast('Enter a ticker and company name','err');return;}
   if(stocks.some(s=>s.ticker===ticker)){toast(`${ticker} is already in the screener`,'err');return;}
-  const price=+$('aPrice').value||1;
-  stocks.push({ticker,name,sector:$('aSec').value,price,prev:price,eps:+$('aEps').value||0.1,bvps:+$('aBvps').value||1,
-    div:+$('aDiv').value||0,h52:+$('a52h').value||price*1.2,l52:+$('a52l').value||price*.8,rsi:+$('aRsi').value||50,liveSource:null});
+  const n=id=>$(id).value===''?null:+$(id).value;
+  const price=n('aPrice')||1;
+  stocks.push({ticker,name,sector:$('aSec').value,price,prev:price,vol:null,val:null,eps:n('aEps'),bvps:n('aBvps'),div:n('aDiv'),h52:n('a52h'),l52:n('a52l'),est:true});
   flashMap[ticker]='up';closeModal('addModal');renderAll(false);toast(`${ticker} added to the screener`,'ok');
 }
 
@@ -856,73 +936,54 @@ function renderAll(anim=false){
   renderPortfolio();
 }
 
-// ─── LIVE PRICES ────────────────────────────────────────
-const configured=()=>API_KEY&&API_KEY!=='YOUR_API_KEY_HERE';
-function toggleAuto(){
-  if($('autoTog').checked){
-    if(!configured()){$('autoTog').checked=false;toast('Live prices are not configured yet','err');return;}
-    scheduleAuto();toast(`Prices will refresh ${$('intSel').selectedOptions[0].text.toLowerCase()}`,'ok');
-  } else {clearTimeout(autoTimer);autoTimer=null;toast('Auto-refresh turned off');}
+// ─── DATA FILES (written nightly by the GitHub Action) ──
+function applyFeed(j){
+  let n=0;
+  (j.stocks||[]).forEach(r=>{
+    if(!r||!r.ticker||!(r.price>0)) return;
+    let s=stocks.find(x=>x.ticker===r.ticker);
+    if(!s){s={ticker:r.ticker,name:r.name||r.ticker,sector:r.sector||'Financial',price:r.price,prev:r.price,eps:null,bvps:null,div:null,h52:null,l52:null,est:true};stocks.push(s);}
+    if(r.price!==s.price) flashMap[s.ticker]=r.price>s.price?'up':'dn';
+    s.price=r.price; s.prev=r.prev>0?r.prev:r.price; s.vol=has(r.volume)?r.volume:null; s.val=has(r.value)?r.value:null;
+    n++;
+  });
+  return n;
 }
-function setIntvl(){if($('autoTog').checked) scheduleAuto();}
-function scheduleAuto(){clearTimeout(autoTimer);autoTimer=setTimeout(()=>{fetchAll();scheduleAuto();},+$('intSel').value*1000);}
-
-async function fetchAll(){
-  if(fetchIP) return;
-  if(!configured()){toast('Live prices are not configured yet','err');return;}
-  fetchIP=true;const btn=$('fetchBtn');btn.disabled=true;btn.classList.add('loading');btn.querySelector('span').textContent='Refreshing';
-  $('tcard').classList.add('updating');setStatus('loading','Refreshing prices');
-  let p=8;setProg(p);progTimer=setInterval(()=>{p+=(90-p)*.05;setProg(p);},220);
-  log(`Requesting prices for ${stocks.length} stocks`);
-  const old={};stocks.forEach(s=>old[s.ticker]=s.price);
-  const today=new Date().toISOString().split('T')[0];
-  const prompt=`Today is ${today}. Find the latest ZMW closing prices for these Zambian listed equities: ${stocks.map(s=>s.ticker).join(', ')}.
-Check African market data portals such as afx.kwayisi.org, african-markets.com, africanfinancials.com and mystocks.africa.
-Return ONLY a JSON object, no markdown and no commentary:
-{"TICKER":{"price":NUMBER_OR_NULL,"prevClose":NUMBER_OR_NULL,"source":"site name"}}
-Use null where a price cannot be found.`;
+async function loadData(user=false){
+  const btn=$('fetchBtn');btn.disabled=true;btn.classList.add('loading');
+  setStatus('loading','Loading prices');setProg(25);
+  let loaded=false;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:MODEL,max_tokens:1500,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){const e=await res.json().catch(()=>null);throw new Error((e&&e.error&&e.error.message)||`Request failed (${res.status})`);}
-    const data=await res.json();
-    const txt=data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').replace(/```json|```/g,'');
-    const a=txt.indexOf('{'),b=txt.lastIndexOf('}');
-    if(a<0||b<0) throw new Error('No price data came back');
-    const parsed=JSON.parse(txt.slice(a,b+1));
-    let up=0,miss=0;
-    stocks.forEach(s=>{
-      const en=parsed[s.ticker];
-      if(en&&+en.price>0){
-        s.prev=+en.prevClose>0?+en.prevClose:s.price;s.price=+en.price;s.liveSource=en.source||'web';up++;
-        if(s.price!==old[s.ticker]) flashMap[s.ticker]=s.price>old[s.ticker]?'up':'dn';
-        log(`${s.ticker}  ${K(s.price)}  from ${s.liveSource}`,'ok');
-      } else {miss++;log(`${s.ticker}  no price found, keeping last value`,'err');}
-    });
-    $('tsLbl').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Lusaka',hour:'2-digit',minute:'2-digit'});
-    setStatus('live',`Live, ${up} of ${stocks.length} prices`);
-    toast(`${up} prices refreshed${miss?`, ${miss} kept at last value`:''}`,'ok');
-  }catch(err){
-    setStatus('error','Refresh failed');log(err.message,'err');toast(`Prices not refreshed: ${err.message}`,'err');
+    const r=await fetch('data/prices.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error('missing');
+    const j=await r.json();
+    const prevDate=priceDate;
+    if(applyFeed(j)>0){loaded=true;priceDate=j.updated_at||priceDate;priceSource=j.source||'data feed';}
+    setProg(70);
+    try{const h=await fetch('data/history.json?t='+Date.now(),{cache:'no-store'});if(h.ok) HIST=await h.json();}catch(e){}
+    if(user) toast(priceDate!==prevDate?`Loaded closing prices for ${fmtDate(priceDate)}`:`Already showing the latest close (${fmtDate(priceDate)})`,'ok');
+  }catch(e){
+    if(user) toast(`No newer price file found. Showing closes from ${fmtDate(priceDate)}.`,'err');
   }finally{
-    clearInterval(progTimer);endProg();fetchIP=false;
-    btn.disabled=false;btn.classList.remove('loading');btn.querySelector('span').textContent='Refresh prices';
-    $('tcard').classList.remove('updating');renderAll(true);
+    endProg();btn.disabled=false;btn.classList.remove('loading');
+    setStatus(loaded?'live':'',`Closing prices, ${fmtDate(priceDate)}`);
+    renderAll(user);
   }
 }
 
 // ─── CSV ────────────────────────────────────────────────
 function doCSV(){
-  const h='Ticker,Company,Sector,Price,Change %,P/E,P/B,ROE %,Earnings yield %,Dividend yield %,RSI,52W position %,Graham number,Margin of safety %,Score,Valuation,Signal,Source';
-  const f=v=>v===null||v===undefined?'':(+v).toFixed(2);
-  const rows=withCalc().map(s=>[s.ticker,`"${s.name}"`,s.sector,s.price.toFixed(2),f(s.change),f(s.pe),f(s.pb),f(s.roe),f(s.ey),f(s.divYield),s.rsi,s.pos52w,f(s.graham),f(s.mos),s.score.toFixed(2),s.valuation,s.signal,s.liveSource||'manual'].join(','));
+  const h='Ticker,Company,Sector,Price,Change %,Value traded,Liquidity,P/E,P/B,ROE %,Earnings yield %,Dividend yield %,52W position %,Graham number,Margin of safety %,Score,Valuation,Signal,Fundamentals';
+  const f=v=>has(v)?(+v).toFixed(2):'';
+  const rows=withCalc().map(s=>[s.ticker,`"${s.name}"`,s.sector,s.price.toFixed(2),f(s.change),f(s.liq.value),s.liq.label,f(s.pe),f(s.pb),f(s.roe),f(s.ey),f(s.divYield),has(s.pos52w)?s.pos52w:'',f(s.graham),f(s.mos),f(s.score),s.valuation||'',s.signal,DQ_LBL[s.dq]].join(','));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+'\n'+rows.join('\n')],{type:'text/csv'}));
   a.download=`Altura_Screener_${new Date().toISOString().slice(0,10)}.csv`;a.click();toast('CSV exported','ok');
 }
 
 // ─── INIT ───────────────────────────────────────────────
+setStatus('',`Closing prices, ${fmtDate(priceDate)}`);
 renderOverview();renderTable(false);renderPortfolio();
+loadData(false);
 (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(moveInd);
 window.addEventListener('resize',moveInd);
 </script>
