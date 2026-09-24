@@ -264,6 +264,61 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 .capacity b{color:var(--text);font-weight:600}
 .check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);grid-column:span 2;cursor:pointer}
 .check input{accent-color:var(--brand2);width:15px;height:15px}
+
+/* price ticker */
+.ticker{display:flex;align-items:stretch;height:42px;border-bottom:1px solid var(--line);background:var(--s1)}
+.ticker-label{flex:none;display:flex;align-items:center;gap:8px;padding:0 16px 0 28px;font-size:12px;color:var(--text3);border-right:1px solid var(--line);white-space:nowrap}
+.ticker-vp{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 32px,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,transparent,#000 32px,#000 calc(100% - 32px),transparent)}
+.ticker-track{display:flex;height:100%;width:max-content;animation:tickerScroll var(--dur,70s) linear infinite}
+.ticker-vp:hover .ticker-track,.ticker-vp:focus-within .ticker-track{animation-play-state:paused}
+@keyframes tickerScroll{to{transform:translateX(-50%)}}
+.tk-item{display:inline-flex;align-items:center;gap:8px;padding:0 20px;border:none;border-right:1px solid var(--line);background:none;color:var(--text);font-size:12.5px;cursor:pointer;white-space:nowrap}
+.tk-item:hover .tk-sym{color:var(--up)}
+.tk-sym{font-weight:600;transition:color .15s}.tk-px{color:var(--text2)}
+.tk-ch{font-weight:500}.tk-ch.up{color:var(--up)}.tk-ch.dn{color:var(--down)}.tk-ch.flat{color:var(--text4)}
+@media (prefers-reduced-motion:reduce){.ticker-track{animation:none!important}.ticker-vp{overflow-x:auto}}
+@media (max-width:640px){.ticker-label{padding-left:16px}}
+
+/* expandable analytics cards */
+.card-hx{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.card-actions{display:flex;gap:6px;flex:none}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--r);border:1px solid var(--line2);background:var(--s2);color:var(--text2);cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .12s}
+.icon-btn:hover{background:var(--s3);color:var(--text);border-color:var(--line3)}
+.icon-btn:active{transform:scale(.94)}
+.card-ph{border:1px dashed var(--line);border-radius:var(--rl)}
+.card.expanded{position:fixed;inset:28px;z-index:160;overflow:auto;border-color:var(--line3);box-shadow:0 30px 90px rgba(0,0,0,.65);animation:xpIn .38s var(--ease)}
+.card.expanded .chart-box{height:calc(100vh - 210px);min-height:320px}
+@keyframes xpIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.xp-backdrop{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.62);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);opacity:0;transition:opacity .25s}
+.xp-backdrop.show{opacity:1}
+.sig-legend{margin-top:12px}
+.sig-legend i{width:11px;height:11px;border-radius:50%;vertical-align:-1px}
+
+/* 52-week chart in the stock snapshot */
+.dm-chart{margin-bottom:18px}
+.dm-chartbox{position:relative;height:170px}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center;font-size:12.5px;color:var(--text3);border:1px dashed var(--line2);border-radius:8px;line-height:1.5}
+
+/* charts tab */
+.chart-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.seg{display:inline-flex;padding:3px;gap:2px;background:var(--s2);border:1px solid var(--line2);border-radius:var(--r)}
+.seg-b{height:26px;padding:0 12px;border:none;border-radius:4px;background:transparent;color:var(--text3);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .2s,color .2s}
+.seg-b:hover{color:var(--text2)}
+.seg-b.active{background:var(--s4);color:var(--text)}
+.pc-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+.pc-px{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-top:6px}
+.pc-stats{display:grid;grid-template-columns:repeat(4,auto);gap:4px 28px}
+.pc-stats .mm-l{font-size:12px}.pc-stats .mm-v{font-size:14.5px;margin-top:1px}
+.chart-box.big{height:460px}
+@media (max-width:700px){.pc-stats{grid-template-columns:repeat(2,auto)}.chart-box.big{height:340px}.card.expanded{inset:10px}}
+
+/* info button */
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:6px;border-radius:50%;border:1px solid var(--line3);background:var(--s2);color:var(--text2);cursor:pointer;vertical-align:-4px;transition:background .15s,color .15s,border-color .15s}
+.info-btn:hover{background:var(--s3);color:var(--text);border-color:var(--text4)}
+.explain{display:grid;gap:14px}
+.explain h4{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.explain p{font-size:13px;color:var(--text2);line-height:1.55;max-width:62ch}
+.explain .lead{padding-bottom:14px;border-bottom:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -291,11 +346,17 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
   <button class="tab" data-tab="screener" onclick="switchTab('screener')">Screener</button>
   <button class="tab" data-tab="analytics" onclick="switchTab('analytics')">Analytics</button>
   <button class="tab" data-tab="portfolio" onclick="switchTab('portfolio')">Portfolio</button>
+  <button class="tab" data-tab="charts" onclick="switchTab('charts')">Charts</button>
   <span class="tab-ind" id="tabInd"></span>
 </nav>
 
 <!-- OVERVIEW -->
-<section class="panel active intro" id="tab-overview"><div class="wrap">
+<section class="panel active intro" id="tab-overview">
+  <div class="ticker">
+    <div class="ticker-label"><span class="dot" id="tkDot"></span><span id="tkLabel">Last close</span></div>
+    <div class="ticker-vp" aria-label="Closing prices, scrolling"><div class="ticker-track" id="tickerTrack"></div></div>
+  </div>
+  <div class="wrap">
   <div class="kpis">
     <div class="kpi" style="animation-delay:0ms"><div class="kpi-l"><i style="background:var(--up)"></i>Strong buy</div><div class="kpi-v pos" id="k-sb">0</div><div class="kpi-s">Score 4.2 and above</div></div>
     <div class="kpi" style="animation-delay:50ms"><div class="kpi-l"><i style="background:#8fca91"></i>Buy</div><div class="kpi-v" style="color:#8fca91" id="k-b">0</div><div class="kpi-s">Score 3.2 to 4.1</div></div>
@@ -378,13 +439,13 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
 <!-- ANALYTICS -->
 <section class="panel" id="tab-analytics"><div class="wrap">
   <div class="grid2">
-    <div class="card"><div class="card-h"><div class="card-t">Composite score</div><div class="card-s">Rated stocks, ranked out of 5</div></div><div class="chart-box"><canvas id="chScore"></canvas></div></div>
-    <div class="card"><div class="card-h"><div class="card-t">Score against liquidity</div><div class="card-s">Value traded (log scale) against score, rated stocks only</div></div><div class="chart-box"><canvas id="chLiq"></canvas></div><div class="note">A high score only helps if you can trade the stock. Look to the top right.</div></div>
-    <div class="card"><div class="card-h"><div class="card-t">Value map</div><div class="card-s">P/E against dividend yield, bubble size shows score</div></div><div class="chart-box"><canvas id="chBub"></canvas></div><div class="note">Stocks towards the top left combine a low earnings multiple with a high yield.</div></div>
+    <div class="card"><div class="card-h card-hx"><div><div class="card-t">Composite score</div><div class="card-s">Rated stocks, ranked out of 5</div></div><div class="card-actions"><button class="icon-btn xp-btn" onclick="toggleExpand(this)" aria-label="Expand" title="Expand"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div></div><div class="chart-box"><canvas id="chScore"></canvas></div></div>
+    <div class="card"><div class="card-h card-hx"><div><div class="card-t">Score against liquidity</div><div class="card-s">Value traded (log scale) against score</div></div><div class="card-actions"><button class="icon-btn xp-btn" onclick="toggleExpand(this)" aria-label="Expand" title="Expand"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div></div><div class="chart-box"><canvas id="chLiq"></canvas></div><div class="legend sig-legend"><span><i style="background:rgba(95,180,98,.46);border:2.5px solid #5fb462"></i>Strong buy</span><span><i style="background:rgba(95,180,98,.24);border:2px solid #5fb462"></i>Buy</span><span><i style="background:rgba(211,163,58,.24);border:2px solid #d3a33a"></i>Hold</span><span><i style="background:rgba(224,86,91,.24);border:2px solid #e0565b"></i>Sell</span><span><i style="background:rgba(224,86,91,.46);border:2.5px solid #e0565b"></i>Strong sell</span></div><div class="note">A high score only helps if you can trade the stock. Look to the top right.</div></div>
+    <div class="card"><div class="card-h card-hx"><div><div class="card-t">Value map</div><div class="card-s">P/E against dividend yield. Circle size shows score</div></div><div class="card-actions"><button class="icon-btn xp-btn" onclick="toggleExpand(this)" aria-label="Expand" title="Expand"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div></div><div class="chart-box"><canvas id="chBub"></canvas></div><div class="legend sig-legend"><span><i style="background:rgba(95,180,98,.46);border:2.5px solid #5fb462"></i>Strong buy</span><span><i style="background:rgba(95,180,98,.24);border:2px solid #5fb462"></i>Buy</span><span><i style="background:rgba(211,163,58,.24);border:2px solid #d3a33a"></i>Hold</span><span><i style="background:rgba(224,86,91,.24);border:2px solid #e0565b"></i>Sell</span><span><i style="background:rgba(224,86,91,.46);border:2.5px solid #e0565b"></i>Strong sell</span></div><div class="note">Stocks towards the top left combine a low earnings multiple with a high yield. Colours change as you move the scoring weights.</div></div>
     <div class="card">
-      <div class="card-h" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div><div class="card-t">Scoring weights</div><div class="card-s">Drag to reweight the model; scores and signals update live</div></div>
-        <button class="btn btn-sm" onclick="resetWeights()">Reset</button>
+      <div class="card-h card-hx">
+        <div><div class="card-t">Scoring weights<button class="info-btn" onclick="openModal('infoModal')" aria-label="How the scoring weights work" title="How the scoring weights work"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 11v6M12 7.5v.01"/></svg></button></div><div class="card-s">Drag to reweight the model; scores and signals update live</div></div>
+        <div class="card-actions"><button class="btn btn-sm" onclick="resetWeights()">Reset</button><button class="icon-btn xp-btn" onclick="toggleExpand(this)" aria-label="Expand" title="Expand"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button></div>
       </div>
       <div id="wtSliders"></div>
       <div class="divider"></div>
@@ -414,6 +475,25 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
   </div>
 </div></section>
 
+<!-- CHARTS -->
+<section class="panel" id="tab-charts"><div class="wrap">
+  <div class="chart-bar">
+    <select class="ctrl" id="cSym" onchange="renderPriceChart()" aria-label="Stock"></select>
+    <select class="ctrl" id="cTf" onchange="renderPriceChart()" aria-label="Timeframe">
+      <option value="1M">1 month</option><option value="3M">3 months</option><option value="6M">6 months</option><option value="YTD">Year to date</option><option value="1Y" selected>1 year</option><option value="3Y">3 years</option><option value="5Y">5 years</option><option value="ALL">All history</option>
+    </select>
+    <div class="seg" role="group" aria-label="Chart type"><button class="seg-b active" data-type="line" onclick="setChartType('line')">Line</button><button class="seg-b" data-type="candle" onclick="setChartType('candle')">Candlestick</button></div>
+    <span class="count" id="cNote"></span>
+  </div>
+  <div class="card">
+    <div class="pc-head">
+      <div><div class="md-tk" id="pcTick"></div><div class="md-nm" id="pcName"></div><div class="pc-px" id="pcPx"></div><div id="pcChg" style="font-size:12.5px;margin-top:2px"></div></div>
+      <div class="pc-stats" id="pcStats"></div>
+    </div>
+    <div class="chart-box big" id="pcBox"></div>
+  </div>
+</div></section>
+
 <footer class="ftr" id="ftr">Closing prices update after each trading session. Fundamentals marked as estimates are placeholders until replaced with published results. Not financial advice.</footer>
 
 <!-- DETAIL MODAL -->
@@ -423,6 +503,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
     <div><div class="md-px" id="dm-price"></div><div id="dm-chg" style="text-align:right;margin-top:4px;font-size:12.5px"></div></div>
   </div>
   <div class="md-b">
+    <div class="dm-chart"><div class="range-l"><span>52-week price</span><span id="dm-chg52"></span></div><div class="dm-chartbox" id="dm-chartbox"></div></div>
     <div class="mgrid" id="dm-metrics"></div>
     <div class="capacity" id="dm-cap"></div>
     <div class="range" id="dm-range">
@@ -432,7 +513,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
     </div>
     <div class="verdict" id="dm-verdict"></div>
   </div>
-  <div class="md-f"><button class="btn" onclick="closeModal('detailModal')">Close</button><button class="btn btn-primary" onclick="editFromDetail()">Edit data</button></div>
+  <div class="md-f"><button class="btn" onclick="closeModal('detailModal')">Close</button><button class="btn" onclick="openFullChart()">Open full chart</button><button class="btn btn-primary" onclick="editFromDetail()">Edit data</button></div>
 </div></div>
 
 <!-- EDIT MODAL -->
@@ -469,6 +550,18 @@ input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;bac
   <div class="md-f"><button class="btn" onclick="closeModal('addModal')">Cancel</button><button class="btn btn-primary" onclick="saveNew()">Add stock</button></div>
 </div></div>
 
+<div class="mo" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle"><div class="md md-sm">
+  <div class="md-h"><div><div class="md-tk" id="infoTitle">How the scoring weights work</div><div class="md-nm">Each slider sets how much one factor counts towards a stock's score</div></div></div>
+  <div class="md-b explain">
+    <p class="lead">Every rated stock earns points on each factor below. A slider at 0 removes that factor; at 3 it counts three times as much as a factor set to 1. The points earned are divided by the most a stock could have earned and scaled to a score out of 5, which sets the signal: Strong buy from 4.2, Buy from 3.2, Hold from 2.2, Sell from 1.2 and Strong sell below that.</p>
+    <div><h4>P/E ratio</h4><p>Rewards cheap earnings. Full points below 8×, three quarters below 12×, half below 18×, a quarter below 25× and none above. Loss-making companies score nothing here. Move it right if you value current profits most.</p></div>
+    <div><h4>P/B ratio</h4><p>Rewards stocks priced close to or below their net assets. Full points below 0.8×, 70% below 1.5×, 30% below 2.5×. Useful for banks, insurers and holding companies. Move it right to favour asset backing over earnings.</p></div>
+    <div><h4>Dividend yield</h4><p>Rewards cash paid out. Full points above 6%, 70% above 4%, 40% above 2%. Stocks with no dividend data skip this factor rather than scoring zero. Move it right for an income focus.</p></div>
+    <div><h4>52-week position</h4><p>Rewards stocks near the bottom of their yearly range: full points in the lowest quarter, half in the lowest 40%, and a small penalty in the top fifth. Move it right for a buy-the-dip approach. Keep it low for thinly traded stocks, where one small trade can move the range.</p></div>
+    <div><h4>Why liquidity isn't a slider</h4><p>Liquidity is shown beside the score rather than inside it, so a stock's value case and how easily you can trade it stay separate. Check both before acting on a signal.</p></div>
+  </div>
+  <div class="md-f"><button class="btn btn-primary" onclick="closeModal('infoModal')">Got it</button></div>
+</div></div>
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -616,7 +709,7 @@ function openModal(id){const m=$(id);m.classList.add('open');requestAnimationFra
 function closeModal(id){const m=$(id);if(!m.classList.contains('open'))return;m.classList.remove('show');setTimeout(()=>m.classList.remove('open'),260);}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('mousedown',e=>{if(e.target===m)closeModal(m.id);}));
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){['addModal','editModal','detailModal'].forEach(closeModal);}
+  if(e.key==='Escape'){if(expanded){collapseCard();return;}['addModal','editModal','detailModal','infoModal'].forEach(closeModal);}
   if(e.key==='/'&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();switchTab('screener');$('srchBox').focus();}
 });
 
@@ -628,11 +721,28 @@ function switchTab(id){
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
   $('tab-overview').classList.remove('intro');
+  if(id!=='analytics') collapseCard();
   moveInd();
   if(id==='overview') renderOverview();
   if(id==='screener') renderTable(true);
   if(id==='analytics'){const fresh=!charts.score;renderAnalytics(true);if(!fresh)Object.values(charts).forEach(c=>{c.$stag=true;c.reset();c.update();});}
   if(id==='portfolio') renderPortfolio();
+  if(id==='charts'){fillSymbolSelect();renderPriceChart();}
+}
+
+// ─── PRICE TICKER ───────────────────────────────────────
+function renderTicker(){
+  const items=[...stocks].sort((a,b)=>a.ticker.localeCompare(b.ticker)).map(s=>{
+    const traded=s.vol>0, ch=s.prev>0?(s.price-s.prev)/s.prev*100:0;
+    const cls=!traded||Math.abs(ch)<1e-4?'flat':ch>0?'up':'dn';
+    const txt=!traded?'No trade':`${ch>0?'▲':ch<0?'▼':''} ${pct(ch)}`.trim();
+    return `<button class="tk-item" onclick="openDetail('${s.ticker}')" aria-label="${s.name}"><span class="tk-sym">${s.ticker}</span><span class="tk-px">${K(s.price)}</span><span class="tk-ch ${cls}">${txt}</span></button>`;
+  }).join('');
+  const tr=$('tickerTrack');
+  tr.innerHTML=items+items.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ');   // second copy makes the loop seamless
+  tr.style.setProperty('--dur',Math.max(40,stocks.length*3.4)+'s');
+  $('tkLabel').textContent=`Last close, ${fmtDate(priceDate).replace(/ \d{4}$/,'')}`;
+  $('tkDot').className='dot'+($('sDot').classList.contains('live')?' live':'');
 }
 
 // ─── OVERVIEW ───────────────────────────────────────────
@@ -762,10 +872,53 @@ function analyticsData(){
   return {
     rated,
     liqPts:rated.map(s=>({x:Math.max(s.liq.value||0,100),y:s.score,t:s.ticker,sig:s.signal,v:s.liq.value})),
-    bub:rated.filter(s=>s.pe!==null).map(s=>({x:Math.min(s.pe,40),y:s.divYield||0,r:4+s.score*2.4,t:s.ticker,sig:s.signal}))
+    bub:rated.filter(s=>s.pe!==null).map(s=>({x:Math.min(s.pe,40),y:s.divYield||0,r:13+s.score*2.2,t:s.ticker,sig:s.signal}))
   };
 }
-function paintPts(ds,pts,alpha){ds.data=pts;ds.backgroundColor=pts.map(p=>SIG_COL[p.sig]+alpha);ds.borderColor=pts.map(p=>SIG_COL[p.sig]);ds.hoverBackgroundColor=pts.map(p=>SIG_COL[p.sig]+'cc');}
+// Logos load from logos/<ticker>.png (or .svg / .jpg). Missing files fall back to the ticker symbol.
+const LOGOS={};
+function logoFor(t){
+  if(t in LOGOS) return LOGOS[t];
+  LOGOS[t]=null;
+  const exts=['png','svg','jpg'];
+  const tryExt=i=>{
+    if(i>=exts.length){LOGOS[t]=false;return;}
+    const img=new Image();
+    img.onload=()=>{LOGOS[t]=img;[charts.liq,charts.bub].forEach(c=>c&&c.draw());};
+    img.onerror=()=>tryExt(i+1);
+    img.src=`logos/${t.toLowerCase()}.${exts[i]}`;
+  };
+  tryExt(0);
+  return null;
+}
+// Circle colours by signal: [rgb, fill opacity, ring colour]
+const CIRC={'Strong Buy':['95,180,98',.46,'#5fb462'],'Buy':['95,180,98',.24,'#5fb462'],'Hold':['211,163,58',.24,'#d3a33a'],'Sell':['224,86,91',.24,'#e0565b'],'Strong Sell':['224,86,91',.46,'#e0565b']};
+const logoPoints={id:'logoPoints',afterDatasetsDraw(chart){
+  const {ctx}=chart, ds=chart.data.datasets[0], meta=chart.getDatasetMeta(0);
+  const active=new Set(chart.getActiveElements().map(a=>a.index));
+  meta.data.forEach((el,i)=>{
+    const d=ds.data[i]; if(!d||el.skip) return;
+    const [rgb,alpha,ring]=CIRC[d.sig]||['154,161,153',.2,'#9aa199'];
+    const on=active.has(i), r=(el.options.radius||12)*(on?1.12:1);
+    ctx.save();
+    ctx.beginPath();ctx.arc(el.x,el.y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${rgb},${on?Math.min(.72,alpha+.2):alpha})`;ctx.fill();
+    ctx.lineWidth=d.sig.startsWith('Strong')?2.5:1.75;ctx.strokeStyle=ring;ctx.stroke();
+    const img=logoFor(d.t);
+    if(img){
+      ctx.beginPath();ctx.arc(el.x,el.y,r-2.5,0,Math.PI*2);ctx.clip();
+      const box=(r-3)*2*.8, ar=(img.naturalWidth||1)/(img.naturalHeight||1);
+      const w=ar>=1?box:box*ar, h=ar>=1?box/ar:box;
+      ctx.drawImage(img,el.x-w/2,el.y-h/2,w,h);
+    } else {
+      ctx.fillStyle='#f4f7f3';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font=`600 ${Math.max(8,Math.min(12,r*.56))}px 'IBM Plex Sans',sans-serif`;
+      ctx.fillText(d.t,el.x,el.y+.5);
+    }
+    ctx.restore();
+  });
+}};
+function paintPts(ds,pts){const clear='rgba(0,0,0,0)';ds.data=pts;ds.backgroundColor=clear;ds.borderColor=clear;ds.hoverBackgroundColor=clear;ds.hoverBorderColor=clear;}
 function renderAnalytics(heat=true){
   const d=analyticsData();
   if(!charts.score){
@@ -774,25 +927,25 @@ function renderAnalytics(heat=true){
       options:{responsive:true,maintainAspectRatio:false,animation:anim(),
         plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:i=>`Score ${(+i.raw).toFixed(2)}`}}},
         scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{min:0,max:5,border:{display:false},ticks:{stepSize:1}}}}});
-    charts.liq=new Chart($('chLiq'),{type:'scatter',plugins:[stagger],
-      data:{datasets:[{data:[],pointRadius:6,pointHoverRadius:8,borderWidth:1.5}]},
-      options:{responsive:true,maintainAspectRatio:false,animation:anim(),
+    charts.liq=new Chart($('chLiq'),{type:'scatter',plugins:[stagger,logoPoints],
+      data:{datasets:[{data:[],pointRadius:15,pointHoverRadius:15,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:anim(),layout:{padding:18},
         plugins:{legend:{display:false},tooltip:{...TT,callbacks:{title:i=>i[0].raw.t,label:i=>`Score ${i.raw.y.toFixed(2)}, ${i.raw.v?Kc(i.raw.v)+' traded':'no trades'}`}}},
-        scales:{x:{type:'logarithmic',min:100,title:{display:true,text:'Value traded (K, log scale)',color:'#666d65'},border:{display:false},ticks:{callback:v=>[100,1e3,1e4,1e5,1e6,1e7].includes(v)?Kc(v):''}},
+        scales:{x:{type:'logarithmic',min:50,title:{display:true,text:'Value traded (K, log scale)',color:'#666d65'},border:{display:false},ticks:{callback:v=>[100,1e3,1e4,1e5,1e6,1e7].includes(v)?Kc(v):''}},
                 y:{min:0,max:5,title:{display:true,text:'Score',color:'#666d65'},border:{display:false},ticks:{stepSize:1}}}}});
-    charts.bub=new Chart($('chBub'),{type:'bubble',plugins:[stagger],
-      data:{datasets:[{data:[],borderWidth:1.5}]},
-      options:{responsive:true,maintainAspectRatio:false,animation:anim(),
+    charts.bub=new Chart($('chBub'),{type:'bubble',plugins:[stagger,logoPoints],
+      data:{datasets:[{data:[],borderWidth:0,hoverRadius:0}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:anim(),layout:{padding:22},
         plugins:{legend:{display:false},tooltip:{...TT,callbacks:{title:i=>i[0].raw.t,label:i=>`P/E ${i.raw.x.toFixed(1)}×, yield ${i.raw.y.toFixed(2)}%, ${i.raw.sig}`}}},
         scales:{x:{title:{display:true,text:'P/E ratio',color:'#666d65'},border:{display:false},min:0},y:{title:{display:true,text:'Dividend yield (%)',color:'#666d65'},border:{display:false},min:0}}}});
-    paintPts(charts.liq.data.datasets[0],d.liqPts,'70');charts.liq.update();
-    paintPts(charts.bub.data.datasets[0],d.bub,'5c');charts.bub.update();
+    paintPts(charts.liq.data.datasets[0],d.liqPts);charts.liq.update();
+    paintPts(charts.bub.data.datasets[0],d.bub);charts.bub.update();
   } else {
     const c=charts.score,ds=c.data.datasets[0];
     c.data.labels=d.rated.map(s=>s.ticker);ds.data=d.rated.map(s=>s.score);
     ds.backgroundColor=d.rated.map(s=>SIG_COL[s.signal]+'b0');ds.hoverBackgroundColor=d.rated.map(s=>SIG_COL[s.signal]);c.update();
-    paintPts(charts.liq.data.datasets[0],d.liqPts,'70');charts.liq.update();
-    paintPts(charts.bub.data.datasets[0],d.bub,'5c');charts.bub.update();
+    paintPts(charts.liq.data.datasets[0],d.liqPts);charts.liq.update();
+    paintPts(charts.bub.data.datasets[0],d.bub);charts.bub.update();
   }
   if(heat) renderLiqHeat();
   if(!$('wtSliders').dataset.built) buildWeights();
@@ -899,7 +1052,7 @@ function openDetail(t){
        <span class="tier t${L.tier}" title="Liquidity"><span class="bars"><b></b><b></b><b></b></span>${L.label}</span>`
     : `<div style="flex:1">${sig('Not rated')}<div class="mm-s" style="margin-top:6px">Enter earnings per share and book value per share from the latest results to score this stock.</div></div>`;
   openModal('detailModal');
-  setTimeout(()=>{if(m.range){mk.style.transition='';mk.style.left=m.pos52w+'%';}if(m.rated)countUp($('dm-score'),m.score,v=>v.toFixed(1));},140);
+  setTimeout(()=>{renderDetailChart(t);if(m.range){mk.style.transition='';mk.style.left=m.pos52w+'%';}if(m.rated)countUp($('dm-score'),m.score,v=>v.toFixed(1));},140);
 }
 function editFromDetail(){const t=detailT;closeModal('detailModal');setTimeout(()=>openEdit(t),240);}
 function openEdit(t){
@@ -929,11 +1082,175 @@ function saveNew(){
   flashMap[ticker]='up';closeModal('addModal');renderAll(false);toast(`${ticker} added to the screener`,'ok');
 }
 
+// ─── PRICE CHART HELPERS ────────────────────────────────
+const shortDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const monthYear=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+const kAxis=v=>'K '+(+v).toLocaleString('en-US',{maximumFractionDigits:2});
+const crosshair={id:'crosshair',afterDatasetsDraw(chart){
+  const a=chart.tooltip&&chart.tooltip.getActiveElements?chart.tooltip.getActiveElements():[];
+  if(!a.length) return;
+  const x=a[0].element.x,{top,bottom}=chart.chartArea,ctx=chart.ctx;
+  ctx.save();ctx.strokeStyle='rgba(233,236,232,.28)';ctx.setLineDash([3,3]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,bottom);ctx.stroke();ctx.restore();
+}};
+const wicks={id:'wicks',beforeDatasetsDraw(chart){
+  const ds=chart.data.datasets[0]; if(!ds.$bars) return;
+  const meta=chart.getDatasetMeta(0),y=chart.scales.y,ctx=chart.ctx;
+  ctx.save();ctx.lineWidth=1;
+  meta.data.forEach((el,i)=>{const b=ds.$bars[i];if(!b)return;const x=Math.round(el.x)+.5;
+    ctx.strokeStyle=ds.$cols[i];ctx.beginPath();ctx.moveTo(x,y.getPixelForValue(b.h));ctx.lineTo(x,y.getPixelForValue(b.l));ctx.stroke();});
+  ctx.restore();
+}};
+function areaFill(col){return c=>{const {ctx,chartArea}=c.chart;if(!chartArea)return 'transparent';const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,col+'45');g.addColorStop(1,col+'00');return g;};}
+const revealDelay=n=>ctx=>(!RM&&ctx.type==='data'&&ctx.mode==='default')?Math.round(ctx.dataIndex*(700/Math.max(n,1))):0;
+
+// ─── 52-WEEK CHART IN THE STOCK SNAPSHOT ────────────────
+let dmChart=null;
+function renderDetailChart(t){
+  if(dmChart){dmChart.destroy();dmChart=null;}
+  const box=$('dm-chartbox'), h=(HIST[t]||[]).slice(-252).filter(r=>+r.c>0);
+  if(h.length<2){
+    $('dm-chg52').textContent='';
+    box.innerHTML=`<div class="chart-empty">The 52-week chart appears once the daily price job has run. On a Professional data key, its first run loads the past year in one go.</div>`;
+    return;
+  }
+  box.innerHTML='<canvas></canvas>';
+  const first=+h[0].c,last=+h[h.length-1].c,chg=(last-first)/first*100,col=chg>=0?'#5fb462':'#e0565b';
+  $('dm-chg52').innerHTML=`<span class="${chg>=0?'pos':'neg'}">${pct(chg)}</span> over ${h.length} sessions`;
+  dmChart=new Chart(box.querySelector('canvas'),{type:'line',plugins:[crosshair],
+    data:{labels:h.map(r=>r.d),datasets:[{data:h.map(r=>+r.c),borderColor:col,borderWidth:2,pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:col,tension:.2,fill:true,backgroundColor:areaFill(col)}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      animation:{duration:RM?0:500,easing:'easeOutQuart',delay:revealDelay(h.length)},
+      plugins:{legend:{display:false},tooltip:{...TT,callbacks:{title:i=>fmtDate(i[0].label),label:i=>K(i.raw)}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:6,maxRotation:0,callback(v){return monthYear(this.getLabelForValue(v));}}},
+              y:{position:'right',grace:'5%',border:{display:false},ticks:{maxTicksLimit:5,callback:kAxis}}}}});
+}
+function openFullChart(){
+  const t=detailT;closeModal('detailModal');fillSymbolSelect();$('cSym').value=t;
+  setTimeout(()=>{if($('tab-charts').classList.contains('active'))renderPriceChart();else switchTab('charts');},220);
+}
+
+// ─── CHARTS TAB ─────────────────────────────────────────
+let pcChart=null, pcType='line', SERIES={};
+const TF_LBL={'1M':'1 month','3M':'3 months','6M':'6 months','YTD':'the year to date','1Y':'1 year','3Y':'3 years','5Y':'5 years','ALL':'all available history'};
+function fillSymbolSelect(){
+  const sel=$('cSym'),cur=sel.value;
+  sel.innerHTML=[...stocks].sort((a,b)=>a.ticker.localeCompare(b.ticker)).map(s=>`<option value="${s.ticker}">${s.ticker}, ${s.name}</option>`).join('');
+  if(cur&&stocks.some(s=>s.ticker===cur)) sel.value=cur;
+  else {const top=[...stocks].sort((a,b)=>(b.val||0)-(a.val||0))[0];if(top) sel.value=top.ticker;}
+}
+async function getSeries(t){
+  if(SERIES[t]) return SERIES[t];
+  try{
+    const r=await fetch(`data/history/${t}.json?t=${Date.now()}`,{cache:'no-store'});
+    if(r.ok){
+      const a=await r.json();
+      const bars=a.map(x=>Array.isArray(x)?{d:x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5]||0,val:+x[6]||0}:x).filter(b=>b&&b.c>0);
+      return SERIES[t]={bars,ohlc:true};
+    }
+  }catch(e){}
+  const bars=(HIST[t]||[]).filter(r=>+r.c>0).map(r=>({d:r.d,o:+r.c,h:+r.c,l:+r.c,c:+r.c,v:+r.v||0,val:+r.val||0}));
+  return SERIES[t]={bars,ohlc:false};
+}
+function sliceTf(bars,tf){
+  if(!bars.length||tf==='ALL') return bars;
+  const last=new Date(bars[bars.length-1].d+'T12:00:00'); let from;
+  if(tf==='YTD') from=new Date(last.getFullYear(),0,1,12);
+  else {from=new Date(last);from.setMonth(from.getMonth()-{'1M':1,'3M':3,'6M':6,'1Y':12,'3Y':36,'5Y':60}[tf]);}
+  const f=from.toISOString().slice(0,10);
+  return bars.filter(b=>b.d>=f);
+}
+function aggregate(bars,candle){
+  if(bars.length<=(candle?160:800)) return {bars,unit:'Daily'};
+  const monthly=bars.length>(candle?900:2000);
+  const key=monthly?d=>d.slice(0,7)+'-01':d=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-((x.getDay()+6)%7));return x.toISOString().slice(0,10);};
+  const out=[];let cur=null;
+  bars.forEach(b=>{const k=key(b.d);
+    if(!cur||cur.d!==k){cur={d:k,o:b.o,h:b.h,l:b.l,c:b.c,v:0,val:0};out.push(cur);}
+    cur.h=Math.max(cur.h,b.h);cur.l=Math.min(cur.l,b.l);cur.c=b.c;cur.v+=b.v;cur.val+=b.val;});
+  return {bars:out,unit:monthly?'Monthly':'Weekly'};
+}
+function setChartType(type){pcType=type;document.querySelectorAll('.seg-b').forEach(b=>b.classList.toggle('active',b.dataset.type===type));renderPriceChart();}
+async function renderPriceChart(){
+  const t=$('cSym').value; if(!t) return;
+  const tf=$('cTf').value, s=stocks.find(x=>x.ticker===t);
+  const ser=await getSeries(t);
+  if($('cSym').value!==t||$('cTf').value!==tf) return;          // a newer selection has taken over
+  const candle=pcType==='candle'&&ser.ohlc;
+  const raw=sliceTf(ser.bars,tf), {bars,unit}=aggregate(raw,candle);
+
+  $('pcTick').textContent=t;$('pcName').textContent=s?s.name:'';
+  $('pcPx').textContent=K(s?s.price:(raw.length?raw[raw.length-1].c:0));
+  if(raw.length>=2){const ch=(raw[raw.length-1].c-raw[0].c)/raw[0].c*100;$('pcChg').innerHTML=`<span class="${ch>=0?'pos':'neg'}">${pct(ch)}</span> <span class="mut">over ${TF_LBL[tf]}</span>`;}
+  else $('pcChg').innerHTML='<span class="mut">Not enough history for this period yet</span>';
+  const stat=(l,v)=>`<div><div class="mm-l">${l}</div><div class="mm-v">${v}</div></div>`;
+  $('pcStats').innerHTML=raw.length?[
+    stat('Period high',K(Math.max(...raw.map(b=>b.h)))),
+    stat('Period low',K(Math.min(...raw.map(b=>b.l)))),
+    stat('Average value traded',Kc(raw.reduce((a,b)=>a+b.val,0)/raw.length)),
+    stat('Sessions with trades',Math.round(raw.filter(b=>b.v>0).length/raw.length*100)+'%')].join(''):'';
+  $('cNote').textContent=!raw.length?'':`${unit} ${candle?'candles':'closing prices'}, ${raw.length} session${raw.length>1?'s':''}`+
+    (pcType==='candle'&&!ser.ohlc?'. Candles need daily open, high and low prices, which arrive with the data feed.':'');
+
+  if(pcChart){pcChart.destroy();pcChart=null;}
+  const box=$('pcBox');
+  if(bars.length<2){box.innerHTML=`<div class="chart-empty">No price history for ${t} in this period yet. The daily price job saves a session every trading day, and on a Professional data key its first run loads earlier years in one go.</div>`;return;}
+  box.innerHTML='<canvas></canvas>';
+
+  const up=bars[bars.length-1].c>=bars[0].c, col=up?'#5fb462':'#e0565b';
+  const vols=bars.map(b=>b.v), maxV=Math.max(1,...vols);
+  let main; const plugins=[crosshair];
+  if(candle){
+    const hi=Math.max(...bars.map(b=>b.h)),lo=Math.min(...bars.map(b=>b.l)),eps=(hi-lo||hi*.01)*.004;
+    const cols=bars.map(b=>b.c>b.o?'#5fb462':b.c<b.o?'#e0565b':'#8a918a');
+    main={type:'bar',data:bars.map(b=>{const a=Math.min(b.o,b.c),z=Math.max(b.o,b.c);return z-a<eps?[a-eps/2,z+eps/2]:[a,z];}),
+      backgroundColor:cols,borderColor:cols,borderWidth:1,borderSkipped:false,yAxisID:'y',order:1,barPercentage:.7,categoryPercentage:.9,grouped:false,$bars:bars,$cols:cols};
+    plugins.push(wicks);
+  } else {
+    main={type:'line',data:bars.map(b=>b.c),borderColor:col,borderWidth:2,pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:col,tension:.15,fill:true,backgroundColor:areaFill(col),yAxisID:'y',order:1};
+  }
+  const vol={type:'bar',data:vols,backgroundColor:'rgba(154,161,153,.2)',hoverBackgroundColor:'rgba(154,161,153,.38)',yAxisID:'yv',order:3,barPercentage:.85,categoryPercentage:1,grouped:false};
+  const tickLbl=d=>unit==='Daily'&&bars.length<=90?shortDate(d):monthYear(d);
+  pcChart=new Chart(box.querySelector('canvas'),{type:'bar',plugins,data:{labels:bars.map(b=>b.d),datasets:[main,vol]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      animation:{duration:RM?0:600,easing:'easeOutQuart',delay:revealDelay(bars.length)},
+      plugins:{legend:{display:false},tooltip:{...TT,filter:i=>i.datasetIndex===0,callbacks:{
+        title:i=>unit==='Monthly'?new Date(i[0].label+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'}):(unit==='Weekly'?'Week of ':'')+fmtDate(i[0].label),
+        label:i=>{const b=bars[i.dataIndex];return candle?[`Open ${K(b.o)}`,`High ${K(b.h)}`,`Low ${K(b.l)}`,`Close ${K(b.c)}`]:[`Close ${K(b.c)}`];},
+        afterLabel:i=>{const b=bars[i.dataIndex];return `Volume ${b.v.toLocaleString()}, ${Kc(b.val)} traded`;}}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8,maxRotation:0,autoSkip:true,callback(v){return tickLbl(this.getLabelForValue(v));}}},
+        y:{position:'right',grace:'6%',border:{display:false},ticks:{maxTicksLimit:7,callback:kAxis}},
+        yv:{display:false,min:0,max:maxV*4.5}}}});
+}
+
+// ─── EXPANDABLE ANALYTICS CARDS ─────────────────────────
+let expanded=null;
+const XP_OPEN='<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>', XP_CLOSE='<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/>';
+function toggleExpand(btn){
+  const card=btn.closest('.card');
+  if(expanded===card){collapseCard();return;}
+  collapseCard();
+  const ph=document.createElement('div');ph.className='card-ph';ph.style.height=card.offsetHeight+'px';card.before(ph);card.$ph=ph;
+  const bd=document.createElement('div');bd.className='xp-backdrop';bd.onclick=collapseCard;document.body.appendChild(bd);card.$bd=bd;
+  requestAnimationFrame(()=>bd.classList.add('show'));
+  card.classList.add('expanded');expanded=card;document.body.style.overflow='hidden';
+  btn.querySelector('svg').innerHTML=XP_CLOSE;btn.setAttribute('aria-label','Collapse');btn.title='Collapse';
+}
+function collapseCard(){
+  if(!expanded) return;
+  const card=expanded;expanded=null;
+  card.classList.remove('expanded');if(card.$ph)card.$ph.remove();
+  const bd=card.$bd;if(bd){bd.classList.remove('show');setTimeout(()=>bd.remove(),250);}
+  document.body.style.overflow='';
+  const btn=card.querySelector('.xp-btn');if(btn){btn.querySelector('svg').innerHTML=XP_OPEN;btn.setAttribute('aria-label','Expand');btn.title='Expand';}
+}
+
 // ─── RENDER ALL ─────────────────────────────────────────
 function renderAll(anim=false){
-  renderOverview();renderTable(anim);
+  renderTicker();renderOverview();renderTable(anim);
   if(charts.score) renderAnalytics(true);
-  renderPortfolio();
+  renderPortfolio();fillSymbolSelect();
+  if($('tab-charts').classList.contains('active')) renderPriceChart();
 }
 
 // ─── DATA FILES (written nightly by the GitHub Action) ──
@@ -960,11 +1277,12 @@ async function loadData(user=false){
     const prevDate=priceDate;
     if(applyFeed(j)>0){loaded=true;priceDate=j.updated_at||priceDate;priceSource=j.source||'data feed';}
     setProg(70);
-    try{const h=await fetch('data/history.json?t='+Date.now(),{cache:'no-store'});if(h.ok) HIST=await h.json();}catch(e){}
     if(user) toast(priceDate!==prevDate?`Loaded closing prices for ${fmtDate(priceDate)}`:`Already showing the latest close (${fmtDate(priceDate)})`,'ok');
   }catch(e){
     if(user) toast(`No newer price file found. Showing closes from ${fmtDate(priceDate)}.`,'err');
   }finally{
+    try{const h=await fetch('data/history.json?t='+Date.now(),{cache:'no-store'});if(h.ok) HIST=await h.json();}catch(e){}
+    SERIES={};
     endProg();btn.disabled=false;btn.classList.remove('loading');
     setStatus(loaded?'live':'',`Closing prices, ${fmtDate(priceDate)}`);
     renderAll(user);
@@ -982,7 +1300,7 @@ function doCSV(){
 
 // ─── INIT ───────────────────────────────────────────────
 setStatus('',`Closing prices, ${fmtDate(priceDate)}`);
-renderOverview();renderTable(false);renderPortfolio();
+renderTicker();renderOverview();renderTable(false);renderPortfolio();fillSymbolSelect();
 loadData(false);
 (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(moveInd);
 window.addEventListener('resize',moveInd);
